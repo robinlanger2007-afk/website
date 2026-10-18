@@ -70,7 +70,7 @@ h1{animation:rise 1.2s cubic-bezier(.2,.7,.2,1) both}
 @media(max-width:420px){header.top nav{gap:.9rem}header.top a{font-size:.85rem}}
 .price-note{margin:1rem 0 0;max-width:60ch;font-size:.85rem;color:var(--mute)}
 #anfrage h2{margin-bottom:.8rem}
-.req-intro{margin:0 0 2rem;max-width:56ch;color:var(--mute)}
+.req-intro{margin:0 0 2rem;max-width:56ch;color:var(--mute)}.hero .hero-note{display:inline-flex;align-items:center;gap:.6rem;margin-top:1.3rem;padding:.55rem 1rem;max-width:100%;border:1px solid #f0b44c;border-radius:1.4rem;background:rgba(8,7,12,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#f3eee6;text-decoration:none;font:600 clamp(.8rem,3.4vw,.95rem)/1.3 Manrope,sans-serif}.hero .hero-note::before{content:"";flex:none;width:.55rem;height:.55rem;border-radius:50%;background:#f0b44c}.hero .hero-note:hover,.hero .hero-note:focus-visible{background:#f0b44c;color:#17141c}.hero .hero-note:hover::before,.hero .hero-note:focus-visible::before{background:#17141c}.req-note{margin:0 0 1.6rem;max-width:56ch;padding:.85rem 1.1rem;border-left:3px solid var(--accent);border-radius:0 .6rem .6rem 0;background:rgba(240,180,76,.12);color:var(--ink)}.req-note b{font-weight:700}
 .req{display:grid;gap:2rem;grid-template-columns:1fr;align-items:start}
 @media(min-width:800px){.req{grid-template-columns:minmax(300px,380px) 1fr;gap:3rem}}
 .req-cal{max-width:420px;width:100%}
@@ -155,7 +155,7 @@ body{overflow-x:clip}
 <header class="top"><a href="#top">Robin Langer</a><nav><a href="#portfolio">Portfolio</a><a href="#preise">Preise</a><a href="#kontakt">Kontakt</a></nav></header>
 <div class="hero" id="top">
 <div class="slides" id="slides"></div>
-<div class="in"><h1>Robin<br>Langer</h1><p id="tag">Fotograf aus Leipzig. Clubnächte, Partys und Portraits, wie sie sich anfühlen.</p></div>
+<div class="in"><h1>Robin<br>Langer</h1><p id="tag">Fotograf aus Leipzig. Clubnächte, Partys und Portraits, wie sie sich anfühlen.</p><a class="hero-note" href="#anfrage">Abibälle: Anfragen noch bis Februar möglich</a></div>
 </div>
 <section id="portfolio">
 <div class="chips" id="chips" role="group" aria-label="Kategorie filtern"></div>
@@ -172,6 +172,7 @@ body{overflow-x:clip}
 </section>
 <section id="anfrage">
 <h2>Anfrage</h2>
+<p class="req-note"><b>Abibälle:</b> Dafür nehme ich noch bis Februar Anfragen an. Wähle unten einfach „Abiball“ aus.</p>
 <p class="req-intro">Such dir einen Tag aus und sag mir kurz, was du brauchst. Wenn du noch nichts Genaues weißt, schreib es einfach in die Nachricht.</p>
 <form class="req" id="reqForm" novalidate="">
 <div class="req-cal">
@@ -181,7 +182,7 @@ body{overflow-x:clip}
 <p class="cal-picked" id="calPicked">Noch kein Tag gewählt.</p>
 </div>
 <div class="req-fields">
-<label>Was möchtest du buchen?<select id="rqArt"><option>Club, Feier oder Event</option><option>Shooting</option><option>Etwas anderes</option></select></label>
+<label>Was möchtest du buchen?<select id="rqArt"><option>Club, Feier oder Event</option><option>Abiball</option><option>Shooting</option><option>Etwas anderes</option></select></label>
 <div class="two"><label>Beginn (ca.)<input type="time" id="rqTime"></label><label>Dauer<select id="rqDur"><option>weiß ich noch nicht</option><option>1 Stunde</option><option>2 Stunden</option><option>3 Stunden</option><option>4 Stunden</option><option>5 Stunden</option><option>6 Stunden</option><option>7 Stunden</option><option>8 Stunden</option><option>9 Stunden</option><option>10 Stunden</option><option>11 Stunden</option><option>12 Stunden</option><option>mehr als 12 Stunden</option></select></label></div>
 <label>Ort oder Adresse (am besten mit Postleitzahl)<input type="text" id="rqOrt" placeholder="z. B. Straße, 04109 Leipzig" autocomplete="off"></label>
 <label>Dein Name<input type="text" id="rqName" autocomplete="name"></label>
@@ -320,7 +321,7 @@ function mailPriceLines(){var m=sums(),L=[''];
 if(m.fee!=null)L.push('Anfahrtspauschale: ca. '+eur(m.fee));
 if(m.base!=null)L.push('Preis (Schätzung): ab '+eur(m.base+m.extra+(m.fee||0))+(m.fee==null?' (ohne Anfahrt)':''));
 return L.length>1?L:[]}
-form.addEventListener('input',saveDraft);form.addEventListener('change',function(e){if(e.target.id==='rqArt'||e.target.id==='rqDur')paintQuote();saveDraft()});
+form.addEventListener('input',saveDraft);form.addEventListener('change',function(e){if(e.target.id==='rqArt'||e.target.id==='rqDur')paintQuote();saveDraft()});var hn=document.querySelector('.hero-note');if(hn)hn.addEventListener('click',function(){var sa=$('rqArt');if(sa.value!=='Abiball'){sa.value='Abiball';paintQuote();saveDraft()}});
 form.addEventListener('submit',function(e){
 e.preventDefault();
 var errs=[];
