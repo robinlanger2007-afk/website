@@ -152,7 +152,7 @@ body{overflow-x:clip}
 </style>
 
 
-<header class="top"><a href="#top">Robin Langer</a><nav><a href="#portfolio">Portfolio</a><a href="#preise">Preise</a><a href="#kontakt">Kontakt</a></nav></header>
+<header class="top"><a href="#top">Robin Langer</a><nav><a href="#portfolio">Portfolio</a><a href="#anfrage">Anfrage</a><a href="#kontakt">Kontakt</a></nav></header>
 <div class="hero" id="top">
 <div class="slides" id="slides"></div>
 <div class="in"><h1>Robin<br>Langer</h1><p id="tag">Fotograf aus Leipzig. Clubnächte, Partys und Portraits, wie sie sich anfühlen.</p><a class="hero-note" href="#anfrage">Abibälle: Anfragen noch bis Februar möglich</a></div>
@@ -160,15 +160,6 @@ body{overflow-x:clip}
 <section id="portfolio">
 <div class="chips" id="chips" role="group" aria-label="Kategorie filtern"></div>
 <div id="groups"></div>
-</section>
-<section id="preise">
-<h2>Preise</h2>
-<ul class="prices">
-<li><div><strong>Club, Feier oder Event</strong><span>bis zu 4 Stunden</span></div><b>ab 200 €</b></li>
-<li><div><strong>Shooting</strong></div><b>ab 50 €</b></li>
-</ul>
-<p class="price-note">Alle Preise sind Ausgangspreise und gelten für bis zu 4 Stunden. Jede weitere Stunde kostet 50 € mehr. Für die Anfahrt kommt je nach Entfernung eine kleine Pauschale dazu.</p>
-<a class="req-cta" href="#anfrage">Termin anfragen</a>
 </section>
 <section id="anfrage">
 <h2>Anfrage</h2>
@@ -262,7 +253,6 @@ body{overflow-x:clip}
 <li>per Instagram-Nachricht verschicken (der Link öffnet Instagram, es gelten die Regeln von Meta Platforms Ireland Limited),</li>
 <li>oder kopieren und selbst einfügen, wo du möchtest.</li>
 </ul>
-<p>Aus deiner Ortsangabe schätzt die Seite eine Anfahrtspauschale. Diese Berechnung läuft komplett in deinem Browser, mit einer Tabelle von Postleitzahlen, die in die Seite eingebaut ist (Daten von GeoNames). Deine Ortsangabe wird dafür nirgendwohin übertragen.</p>
 <p>Wenn deine Nachricht bei mir ankommt, egal ob über das Formular oder direkt per E-Mail, Instagram oder TikTok, verarbeite ich die Angaben, um deine Anfrage zu beantworten und einen möglichen Auftrag vorzubereiten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen auf deine Anfrage) und, wenn es nur um eine Antwort geht, lit. f DSGVO. Ich gebe die Angaben nicht an Dritte weiter, außer ich bin gesetzlich dazu verpflichtet. Wie lange ich sie speichere, steht unter Punkt 8.</p>
 <h3>6. Speicherung in deinem Browser</h3>
 <p>Die Seite speichert zwei Dinge lokal in deinem Browser (Local Storage), nicht auf einem Server: den Entwurf deines Formulars, damit nichts verloren geht, wenn du die Seite verlässt, und die Bilder, die du als Favoriten markiert hast. Diese Daten werden nicht an mich übertragen. Favoriten erfahre ich nur, wenn du sie mit einer Anfrage mitschickst. Die Speicherung ist nötig, um die von dir gewünschten Funktionen bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. f DSGVO). Du kannst Favoriten in der Galerie wieder entfernen oder alle gespeicherten Daten über die Einstellungen deines Browsers löschen.</p>
@@ -371,17 +361,11 @@ if(over>0)rows.push([(hr.min?'Mindestens ':'')+over+(over===1?' weitere Stunde':
 if(fee!=null)rows.push(['Anfahrt (ca. '+trip.km+' km, hin und zurück)','+ '+eur(fee)]);
 if(base!=null&&(over>0||fee!=null)){total=base+extra+(fee||0);rows.push([mail?'Zusammen ungefähr':'Zusammen, ohne Anfahrt','ab '+eur(total),'tot'])}
 return rows}
-function paintQuote(){
-var q=$('rqQuote'),rows=calc(false);q.textContent='';
-rows.forEach(function(r){var d=document.createElement('div');d.className='qr'+(r[2]?' '+r[2]:'');var x=document.createElement('span');x.textContent=r[0];var y=document.createElement('b');y.textContent=r[1];d.appendChild(x);d.appendChild(y);q.appendChild(d)});
-if(BASE[$('rqArt').value]!=null){var n=document.createElement('p');n.className='q-note';n.textContent='Dazu kommt eine kleine Pauschale für die Anfahrt. Den genauen Preis sage ich dir, sobald ich deine Anfrage gesehen habe.';q.appendChild(n)}}
+function paintQuote(){var q=$('rqQuote');if(q)q.textContent=''}
 function paintDist(){var t=val('rqOrt');trip=null;if(t.length>=3){var p=findPlace(t);if(p)trip=estimate(p)}}
 function endTime(){var hr=hours(),t=val('rqTime');if(!hr||hr.min||!/^\d{1,2}:\d{2}$/.test(t))return '';var p=t.split(':'),m=((+p[0])*60+(+p[1])+hr.h*60)%1440;return ('0'+Math.floor(m/60)).slice(-2)+':'+('0'+(m%60)).slice(-2)}
 function sums(){var a=$('rqArt').value,base=BASE[a],hr=hours(),over=hr?Math.max(0,hr.h-FREE_H):0;return {base:base,extra:over*EXTRA_H,fee:trip&&trip.fee!=null?trip.fee:null}}
-function mailPriceLines(){var m=sums(),L=[''];
-if(m.fee!=null)L.push('Anfahrtspauschale: ca. '+eur(m.fee));
-if(m.base!=null)L.push('Preis (Schätzung): ab '+eur(m.base+m.extra+(m.fee||0))+(m.fee==null?' (ohne Anfahrt)':''));
-return L.length>1?L:[]}
+function mailPriceLines(){return []}
 form.addEventListener('input',saveDraft);form.addEventListener('change',function(e){if(e.target.id==='rqArt'||e.target.id==='rqDur')paintQuote();saveDraft()});var hn=document.querySelector('.hero-note');if(hn)hn.addEventListener('click',function(){var sa=$('rqArt');if(sa.value!=='Abiball'){sa.value='Abiball';paintQuote();saveDraft()}});(function(){var cur=null,last=null;function openL(n){var d=$('dlg-'+n);if(!d||typeof d.showModal!=='function')return;if(cur&&cur!==d&&cur.open)cur.close();if(!d.open){last=document.activeElement;d.showModal()}cur=d;document.body.classList.add('legal-open');var b=d.querySelector('.legal-body');if(b)b.scrollTop=0}document.addEventListener('click',function(e){var t=e.target;if(!t||!t.closest)return;var a=t.closest('[data-legal]');if(a){e.preventDefault();openL(a.getAttribute('data-legal'));return}var x=t.closest('.legal-x');if(x){var dd=x.closest('dialog');if(dd)dd.close();return}if(t.tagName==='DIALOG'&&t.classList.contains('legal'))t.close()});['impressum','datenschutz'].forEach(function(n){var d=$('dlg-'+n);if(d)d.addEventListener('close',function(){document.body.classList.remove('legal-open');cur=null;if(last&&last.focus){try{last.focus()}catch(_){}}})});if(/^#(impressum|datenschutz)$/.test(location.hash))openL(location.hash.slice(1))})();
 form.addEventListener('submit',function(e){
 e.preventDefault();
