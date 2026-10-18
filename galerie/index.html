@@ -123,12 +123,14 @@
 
 <footer><span>© <span id="yr"></span> Robin Langer, Leipzig</span><nav><a href="/#impressum">Impressum</a><a href="/#datenschutz">Datenschutz</a></nav></footer>
 
+<script src="config.js"></script>
 <script src="shared.js"></script>
 <script>
 (function () {
   'use strict';
   var G = window.Galerie, $ = function (id) { return document.getElementById(id); };
-  var BASE = new URL('g/', location.href.split('#')[0]).href;
+  var STORE = (window.GALERIE_STORE || '').replace(/\/+$/, '');
+  var BASE = STORE + '/g/';
   var PART_LIMIT = 400e6;
   var S = { key: null, id: null, m: null, sel: new Set(), selecting: false, thumbs: {}, prev: {}, prevOrder: [], cur: -1 };
   $('yr').textContent = new Date().getFullYear();
@@ -144,6 +146,7 @@
 
   async function unlock(pw) {
     if (!pw.trim()) return;
+    if (!STORE) { $('err').textContent = 'Die Galerie wird gerade eingerichtet. Bitte versuch es später noch einmal.'; return; }
     var go = $('go'); go.disabled = true; go.innerHTML = '<span class="spin"></span> Wird geöffnet…'; $('err').textContent = '';
     try {
       var d = await G.derive(pw);

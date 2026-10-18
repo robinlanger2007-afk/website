@@ -21,12 +21,14 @@
 .row input{flex:1;min-width:0}
 .row .btn{flex:none}
 textarea{min-height:5.5rem;resize:vertical}
-.pwfield{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em}
-details.help{margin-top:.2rem;color:var(--mute);font-size:.92rem}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em}
+details.help{color:var(--mute);font-size:.94rem;border:1px solid var(--line);border-radius:.8rem;padding:.8rem 1rem}
 details.help summary{cursor:pointer;color:var(--ink);font-weight:600}
-details.help ol{padding-left:1.2rem;margin:.6rem 0}
-details.help li{margin:.25rem 0}
-details.help b{color:var(--ink)}
+details.help ol{padding-left:1.3rem;margin:.8rem 0 .4rem}
+details.help li{margin:.55rem 0}
+details.help b,details.help code{color:var(--ink)}
+details.help code{font-family:ui-monospace,Menlo,monospace;font-size:.88em;background:var(--bg);border:1px solid var(--line);border-radius:.3rem;padding:.05rem .35rem}
+details.help .btn{margin:.4rem 0}
 .status{display:flex;align-items:center;gap:.6rem;font-weight:600}
 .status .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--mute)}
 .status.ok .dot{background:var(--ok)}.status.bad .dot{background:var(--err)}
@@ -34,7 +36,7 @@ details.help b{color:var(--ink)}
 .drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
 .drop strong{font-family:Syne,sans-serif;font-size:1.25rem}
 .drop input{position:absolute;width:1px;height:1px;opacity:0}
-.check{display:flex!important;grid-template-columns:none!important;gap:.7rem!important;align-items:flex-start;font-weight:400}
+.check{display:flex!important;gap:.7rem!important;align-items:flex-start;font-weight:400}
 .check input{width:1.2rem;height:1.2rem;margin:.2rem 0 0;accent-color:var(--accent);flex:none}
 .check b{font-weight:600}
 .prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
@@ -53,7 +55,7 @@ details.help b{color:var(--ink)}
 .glist .pw{font-family:ui-monospace,Menlo,monospace;font-size:.95rem}
 .glist .acts{display:flex;flex-wrap:wrap;gap:.45rem}
 .glist .tag{display:inline-block;font-size:.75rem;font-weight:700;color:var(--err);border:1px solid currentColor;border-radius:1rem;padding:0 .5rem;margin-left:.4rem;vertical-align:middle}
-.toast{position:fixed;left:50%;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.65rem 1.2rem;border-radius:2rem;font-weight:600;z-index:30;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.toast{position:fixed;left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100vw - 2rem);bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:.65rem 1.2rem;border-radius:2rem;font-weight:600;z-index:30;box-shadow:0 8px 30px rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
@@ -66,31 +68,33 @@ details.help b{color:var(--ink)}
 
   <!-- Verbindung -->
   <section class="card" id="cConn">
-    <h2>Verbindung zu GitHub</h2>
+    <h2>Speicher (Cloudflare R2)</h2>
     <p class="status" id="connStatus"><span class="dot"></span><span>Noch nicht verbunden</span></p>
     <div class="fields" id="connFields" style="margin-top:1rem">
-      <label>Zugangsschlüssel (Token)
-        <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
-      </label>
-      <details class="help">
-        <summary>So bekommst du den Schlüssel (einmalig, ca. 2 Minuten)</summary>
+      <details class="help" id="setup">
+        <summary>Einrichtung (einmalig, ca. 15 Minuten – am besten am Computer)</summary>
         <ol>
-          <li>Auf <b>github.com</b> anmelden, oben rechts aufs Profilbild → <b>Settings</b>.</li>
-          <li>Ganz unten links <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>.</li>
-          <li>Name z. B. „Galerie-Upload“, Ablauf z. B. <b>1 Jahr</b>.</li>
-          <li>Bei <b>Repository access</b>: „Only select repositories“ → <b>website</b> auswählen.</li>
-          <li>Bei <b>Permissions</b> → <b>Contents</b> auf <b>Read and write</b> stellen.</li>
-          <li><b>Generate token</b>, den Schlüssel kopieren und hier einfügen.</li>
+          <li>Auf <b>dash.cloudflare.com</b> kostenlos registrieren und die E-Mail bestätigen.</li>
+          <li>Links <b>R2 Object Storage</b> öffnen und aktivieren. Cloudflare möchte dafür eine Zahlungsmethode – bis 10 GB kostet es aber nichts.</li>
+          <li><b>Create bucket</b> → Name <code>galerie</code> → bei Location „Provide a location hint“ <b>Western Europe</b> wählen → <b>Create bucket</b>.</li>
+          <li>Links <b>Compute (Workers)</b> → <b>Workers &amp; Pages</b> → <b>Create</b> → <b>Start with Hello World</b> → Name <code>galerie</code> → <b>Deploy</b>.</li>
+          <li><b>Edit code</b> → den vorhandenen Code komplett löschen → diesen hier einfügen → oben rechts <b>Deploy</b>.<br>
+            <button class="btn small" id="copyWorker" type="button">Worker-Code kopieren</button></li>
+          <li>Zurück zum Worker → <b>Bindings</b> → <b>Add binding</b> → <b>R2 bucket</b> → Variable name <code>BUCKET</code>, Bucket <code>galerie</code> → <b>Add binding</b>.</li>
+          <li><b>Settings</b> → <b>Variables and Secrets</b> → <b>Add</b> → Type <b>Secret</b>, Name <code>ADMIN_KEY</code>, Value: den Admin-Schlüssel unten (erst <b>Erzeugen</b>, dann <b>Kopieren</b>) → <b>Deploy</b>.</li>
+          <li>Die Worker-Adresse (endet auf <code>.workers.dev</code>, steht oben auf der Worker-Seite) unten einfügen und auf <b>Speichern &amp; verbinden</b> tippen.</li>
         </ol>
-        Der Schlüssel wird nur in diesem Browser auf diesem Gerät gespeichert. Gib ihn niemandem weiter.
       </details>
-      <div class="two">
-        <label>Repository<input id="repo" spellcheck="false"></label>
-        <label>Branch<input id="branch" spellcheck="false"></label>
-      </div>
+      <label>Worker-Adresse
+        <input id="store" type="url" inputmode="url" spellcheck="false" autocomplete="off" placeholder="https://galerie.dein-name.workers.dev">
+      </label>
+      <label>Admin-Schlüssel
+        <span class="row"><input id="akey" class="mono" type="password" spellcheck="false" autocomplete="off"><button class="btn ghost" id="genKey" type="button">Erzeugen</button><button class="btn ghost" id="copyKey" type="button">Kopieren</button></span>
+        <span class="hint">Wird nur in diesem Browser auf diesem Gerät gespeichert. Gib ihn niemandem weiter.</span>
+      </label>
       <div class="row" style="flex-wrap:wrap">
         <button class="btn" id="connect" type="button">Speichern &amp; verbinden</button>
-        <button class="btn ghost" id="forget" type="button" hidden>Schlüssel von diesem Gerät löschen</button>
+        <button class="btn ghost" id="forget" type="button" hidden>Von diesem Gerät abmelden</button>
       </div>
       <p class="err" id="connErr"></p>
     </div>
@@ -106,9 +110,9 @@ details.help b{color:var(--ink)}
         <label>Datum des Shootings<input id="fDate" type="date"></label>
         <label>Download möglich bis<input id="fUntil" type="date"></label>
       </div>
-      <label>Nachricht an den Kunden (optional)<textarea id="fNote" maxlength="1000" placeholder="z. B. Danke für den schönen Abend! Markiere gern deine Lieblingsbilder …"></textarea></label>
+      <label>Nachricht an den Kunden (optional)<textarea id="fNote" maxlength="1000" placeholder="z. B. Danke für den schönen Abend!"></textarea></label>
       <label id="pwLabel">Passwort
-        <span class="row"><input id="fPw" class="pwfield" spellcheck="false" autocomplete="off"><button class="btn ghost" id="newPw" type="button" title="Neues Passwort erzeugen">Neu</button></span>
+        <span class="row"><input id="fPw" class="mono" spellcheck="false" autocomplete="off"><button class="btn ghost" id="newPw" type="button" title="Neues Passwort erzeugen">Neu</button></span>
         <span class="hint">Das Passwort ist der Schlüssel zur Galerie. Es lässt sich nachträglich nicht ändern und nicht wiederherstellen.</span>
       </label>
       <label class="drop" id="drop">
@@ -116,7 +120,7 @@ details.help b{color:var(--ink)}
         <strong>Bilder auswählen</strong>
         <span class="hint" id="fileInfo">oder hierher ziehen · JPEG, PNG, WebP, HEIC</span>
       </label>
-      <label class="check"><input id="fFull" type="checkbox" checked><span><b>Originale in voller Auflösung</b><br><span class="hint">Aus: Bilder werden auf 4000 px verkleinert (ca. ⅓ der Größe) – so passen deutlich mehr Galerien in den Speicher.</span></span></label>
+      <label class="check"><input id="fFull" type="checkbox" checked><span><b>Originale in voller Auflösung</b><br><span class="hint">Aus: Bilder werden auf 4000 px verkleinert (ca. ⅓ der Größe).</span></span></label>
       <div class="row" style="flex-wrap:wrap"><button class="btn" id="start" type="button" disabled>Hochladen</button></div>
       <div id="progBox" hidden>
         <p class="hint" id="progTxt" style="margin-bottom:.5rem"></p>
@@ -135,7 +139,7 @@ details.help b{color:var(--ink)}
     <ul class="glist" id="glist"></ul>
     <div class="fields" style="margin-top:1.5rem">
       <label>Galerie von einem anderen Gerät hinzufügen
-        <span class="row"><input id="impPw" class="pwfield" placeholder="Passwort der Galerie" spellcheck="false" autocomplete="off"><button class="btn ghost" id="impGo" type="button">Laden</button></span>
+        <span class="row"><input id="impPw" class="mono" placeholder="Passwort der Galerie" spellcheck="false" autocomplete="off"><button class="btn ghost" id="impGo" type="button">Laden</button></span>
       </label>
       <p class="err" id="impErr"></p>
     </div>
@@ -143,19 +147,20 @@ details.help b{color:var(--ink)}
 </main>
 <footer><span>© <span id="yr"></span> Robin Langer, Leipzig</span><nav><a href="/">Zur Website</a></nav></footer>
 
+<script src="../config.js"></script>
 <script src="../shared.js"></script>
 <script>
 (function () {
   'use strict';
   var G = window.Galerie, $ = function (id) { return document.getElementById(id); };
-  var DIR = 'galerie/g/';
-  var LIMIT = 1e9; // GitHub Pages: max. 1 GB pro Website
+  var FREE = 10e9; // Cloudflare R2: 10 GB kostenlos
   var SITE = new URL('../', location.href.split('#')[0]).href;
   $('yr').textContent = new Date().getFullYear();
 
   function load(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (_) { return d; } }
-  function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} }
-  var cfg = load('galerie-admin', { repo: 'robinlanger2007-afk/website', branch: 'main', token: '' });
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} }
+  var cfg = load('galerie-r2', { store: window.GALERIE_STORE || '', key: '' });
+  if (!cfg.store && window.GALERIE_STORE) cfg.store = window.GALERIE_STORE;
   var list = load('galerie-list', []);
   var remote = null; // {id: {bytes, count}}
   var mode = null;   // null = neue Galerie, sonst {id, pw, m}
@@ -163,88 +168,81 @@ details.help b{color:var(--ink)}
 
   function toast(t) { var d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2400); }
   async function copy(t) { try { await navigator.clipboard.writeText(t); toast('Kopiert'); } catch (_) { prompt('Zum Kopieren:', t); } }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
-  // ---------- GitHub ----------
-  async function gh(path, opt, tries) {
+  // ---------- Speicher (Worker) ----------
+  async function api(path, opt, tries) {
     opt = opt || {}; tries = tries || 1;
     for (var a = 0; ; a++) {
       var r;
       try {
-        r = await fetch('https://api.github.com' + path, {
-          method: opt.method || 'GET', body: opt.body,
-          headers: Object.assign({ Authorization: 'Bearer ' + cfg.token, Accept: opt.accept || 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }, opt.body ? { 'Content-Type': 'application/json' } : {}),
-          cache: 'no-store'
-        });
-      } catch (e) { if (a < tries - 1) { await sleep(1500 * (a + 1)); continue; } throw new Error('Keine Internetverbindung zu GitHub.'); }
-      if (r.ok) return opt.raw ? r.arrayBuffer() : (r.status === 204 ? null : r.json());
-      if ((r.status >= 500 || r.status === 403 || r.status === 429) && a < tries - 1) { await sleep(2000 * (a + 1)); continue; }
-      var msg = ''; try { msg = (await r.json()).message || ''; } catch (_) {}
-      var e = new Error(msg || ('GitHub-Fehler ' + r.status)); e.status = r.status; throw e;
+        var h = { Authorization: 'Bearer ' + cfg.key };
+        if (opt.json) h['Content-Type'] = 'application/json';
+        r = await fetch(cfg.store + '/' + path, { method: opt.method || 'GET', body: opt.json ? JSON.stringify(opt.json) : opt.body, headers: h, cache: 'no-store' });
+      } catch (e) {
+        if (a < tries - 1) { await sleep(1500 * (a + 1)); continue; }
+        var ne = new Error('Keine Verbindung zum Speicher. Stimmt die Worker-Adresse?'); ne.net = true; throw ne;
+      }
+      if (r.ok) return r.json();
+      if ((r.status >= 500 || r.status === 429) && a < tries - 1) { await sleep(2000 * (a + 1)); continue; }
+      var msg = ''; try { msg = (await r.json()).error || ''; } catch (_) {}
+      var e = new Error(msg || ('Speicher-Fehler ' + r.status)); e.status = r.status; throw e;
     }
   }
-  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-  function b64(blob) {
-    return new Promise(function (res, rej) {
-      var fr = new FileReader();
-      fr.onload = function () { res(fr.result.slice(fr.result.indexOf(',') + 1)); };
-      fr.onerror = function () { rej(fr.error); };
-      fr.readAsDataURL(blob);
-    });
-  }
-  async function putBlob(blob) {
-    var j = await gh('/repos/' + cfg.repo + '/git/blobs', { method: 'POST', body: JSON.stringify({ content: await b64(blob), encoding: 'base64' }) }, 5);
-    return j.sha;
-  }
-  async function commit(entries, message) {
-    for (var a = 0; a < 5; a++) {
-      var ref = await gh('/repos/' + cfg.repo + '/git/ref/heads/' + cfg.branch, null, 3);
-      var head = ref.object.sha;
-      var c = await gh('/repos/' + cfg.repo + '/git/commits/' + head, null, 3);
-      var t = await gh('/repos/' + cfg.repo + '/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: c.tree.sha, tree: entries }) }, 3);
-      var nc = await gh('/repos/' + cfg.repo + '/git/commits', { method: 'POST', body: JSON.stringify({ message: message, tree: t.sha, parents: [head] }) }, 3);
-      try { await gh('/repos/' + cfg.repo + '/git/refs/heads/' + cfg.branch, { method: 'PATCH', body: JSON.stringify({ sha: nc.sha }) }); return nc.sha; }
-      catch (e) { if (e.status !== 422 || a === 4) throw e; await sleep(1500); }
-    }
-  }
+  function put(path, blob) { return api(path, { method: 'PUT', body: blob }, 5); }
   async function scanRemote() {
-    var t = await gh('/repos/' + cfg.repo + '/git/trees/' + cfg.branch + '?recursive=1', null, 3);
-    var out = {};
-    (t.tree || []).forEach(function (e) {
-      if (e.type !== 'blob' || e.path.indexOf(DIR) !== 0) return;
-      var rest = e.path.slice(DIR.length).split('/'), id = rest[0];
-      var g = out[id] || (out[id] = { bytes: 0, count: 0, paths: [] });
-      g.bytes += e.size || 0; g.paths.push(e.path);
-      if (rest[1] === 'o') g.count++;
+    var r = await api('admin/list', null, 3), out = {};
+    r.objects.forEach(function (o) {
+      var p = o.key.split('/'), id = p[1];
+      var g = out[id] || (out[id] = { bytes: 0, count: 0, hasM: false });
+      g.bytes += o.size;
+      if (p[2] === 'o') g.count++;
+      if (p[2] === 'm.bin') g.hasM = true;
     });
     return out;
   }
 
   // ---------- Verbindung ----------
-  $('token').value = cfg.token; $('repo').value = cfg.repo; $('branch').value = cfg.branch;
+  $('store').value = cfg.store; $('akey').value = cfg.key;
+  if (!cfg.key) $('setup').open = true;
+  function genKey() {
+    var r = crypto.getRandomValues(new Uint8Array(24));
+    return Array.prototype.map.call(r, function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+  }
+  $('genKey').onclick = function () {
+    if ($('akey').value && !confirm('Neuen Schlüssel erzeugen? Dann musst du ihn auch bei Cloudflare als ADMIN_KEY neu eintragen.')) return;
+    $('akey').value = genKey(); $('akey').type = 'text';
+  };
+  $('copyKey').onclick = function () { if ($('akey').value) copy($('akey').value); };
+  $('copyWorker').onclick = async function () {
+    try { var r = await fetch('../worker.js', { cache: 'no-store' }); copy(await r.text()); } catch (_) { toast('Konnte den Code nicht laden'); }
+  };
   function setStatus(ok, txt) { var s = $('connStatus'); s.className = 'status ' + (ok ? 'ok' : 'bad'); s.lastElementChild.textContent = txt; }
   async function connect() {
-    cfg.token = $('token').value.trim(); cfg.repo = $('repo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, ''); cfg.branch = $('branch').value.trim() || 'main';
+    var s = $('store').value.trim().replace(/\/+$/, '');
+    if (s && !/^https?:\/\//.test(s)) s = 'https://' + s;
+    cfg.store = s; cfg.key = $('akey').value.trim();
     $('connErr').textContent = '';
-    if (!cfg.token) { setStatus(false, 'Noch nicht verbunden'); return; }
+    if (!cfg.store || !cfg.key) { setStatus(false, 'Noch nicht verbunden'); if (cfg.store || cfg.key) $('connErr').textContent = 'Bitte Worker-Adresse und Admin-Schlüssel eintragen.'; return; }
     var b = $('connect'); b.disabled = true;
     try {
-      var r = await gh('/repos/' + cfg.repo);
-      if (r.permissions && !r.permissions.push) throw new Error('Der Schlüssel darf in „' + cfg.repo + '“ nichts speichern. Stell bei „Contents“ auf „Read and write“.');
-      store('galerie-admin', cfg);
-      setStatus(true, 'Verbunden mit ' + cfg.repo);
-      $('connFields').querySelector('details').open = false;
-      $('forget').hidden = false;
-      $('cNew').hidden = false; $('cList').hidden = false;
+      await api('admin/check');
+      save('galerie-r2', cfg);
+      setStatus(true, 'Verbunden mit ' + cfg.store.replace(/^https?:\/\//, ''));
+      $('setup').open = false; $('akey').type = 'password';
+      $('forget').hidden = false; $('cNew').hidden = false; $('cList').hidden = false;
+      if (window.GALERIE_STORE && window.GALERIE_STORE.replace(/\/+$/, '') !== cfg.store) $('connErr').textContent = 'Achtung: Die Kundenseite nutzt eine andere Speicher-Adresse (' + window.GALERIE_STORE + ').';
+      else if (!window.GALERIE_STORE) $('connErr').textContent = 'Hinweis: Die Kundenseite kennt diese Speicher-Adresse noch nicht – sie muss einmal in galerie/config.js eingetragen werden.';
       refresh();
     } catch (e) {
       setStatus(false, 'Verbindung fehlgeschlagen');
-      $('connErr').textContent = e.status === 401 ? 'Der Schlüssel ist ungültig oder abgelaufen.' : e.status === 404 ? 'Repository nicht gefunden – oder der Schlüssel hat keinen Zugriff darauf.' : e.message;
+      $('connErr').textContent = e.status === 401 ? 'Der Admin-Schlüssel stimmt nicht mit ADMIN_KEY im Worker überein.' : e.message;
     } finally { b.disabled = false; }
   }
   $('connect').onclick = connect;
   $('forget').onclick = function () {
-    if (!confirm('Schlüssel von diesem Gerät löschen? Die Galerien bleiben online.')) return;
-    cfg.token = ''; store('galerie-admin', cfg); $('token').value = ''; this.hidden = true;
+    if (!confirm('Von diesem Gerät abmelden? Die Galerien bleiben online. Den Admin-Schlüssel brauchst du, um dich wieder anzumelden.')) return;
+    cfg.key = ''; save('galerie-r2', cfg); $('akey').value = ''; this.hidden = true;
     $('cNew').hidden = $('cList').hidden = true; setStatus(false, 'Noch nicht verbunden');
   };
 
@@ -272,7 +270,7 @@ details.help b{color:var(--ink)}
   drop.addEventListener('drop', function (e) { setFiles(e.dataTransfer.files); });
 
   // ---------- Bildverarbeitung ----------
-  function canvasJpeg(src, w, h, q) {
+  function draw(src, w, h) {
     var c = document.createElement('canvas'); c.width = w; c.height = h;
     var x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
     x.drawImage(src, 0, 0, w, h);
@@ -281,8 +279,8 @@ details.help b{color:var(--ink)}
   async function toJpeg(bmp, max, q) {
     var W = bmp.width, H = bmp.height, s = Math.min(1, max / Math.max(W, H));
     var src = bmp, cw = W, ch = H;
-    while (cw * s < cw / 2 - 1) { cw = Math.round(cw / 2); ch = Math.round(ch / 2); src = canvasJpeg(src, cw, ch); } // schrittweise verkleinern = schärfer
-    var c = canvasJpeg(src, Math.max(1, Math.round(W * s)), Math.max(1, Math.round(H * s)));
+    while (cw * s < cw / 2 - 1) { cw = Math.round(cw / 2); ch = Math.round(ch / 2); src = draw(src, cw, ch); } // schrittweise verkleinern = schärfer
+    var c = draw(src, Math.max(1, Math.round(W * s)), Math.max(1, Math.round(H * s)));
     return new Promise(function (res, rej) {
       c.toBlob(function (b) { c.width = c.height = 0; b ? res(b) : rej(new Error('Bild konnte nicht umgewandelt werden')); }, 'image/jpeg', q);
     });
@@ -313,48 +311,47 @@ details.help b{color:var(--ink)}
         m = { v: 1, created: Date.now(), images: [] };
       }
       m.title = title; m.date = $('fDate').value; m.until = $('fUntil').value; m.note = $('fNote').value.trim(); m.updated = Date.now();
-      var dir = DIR + d.id + '/', entries = [], next = 0, done = 0, failed = 0, total = picked.length;
+      var dir = 'g/' + d.id + '/', next = 0, done = 0, failed = 0, total = picked.length;
       var startN = m.images.reduce(function (x, i) { return Math.max(x, i.n); }, 0);
       var added = [];
       async function one(k) {
-        var f = picked[k], n = startN + k + 1, bmp;
+        var f = picked[k], n = startN + k + 1, bmp, t, p, o = f, name = f.name, type = f.type || 'image/jpeg', w, h;
         try { bmp = await createImageBitmap(f, { imageOrientation: 'from-image' }); }
         catch (e) { throw new Error(f.name + ': Format wird von diesem Browser nicht unterstützt – bitte als JPEG exportieren.'); }
         try {
-          var w = bmp.width, h = bmp.height;
-          var t = await toJpeg(bmp, 640, 0.8);
-          var p = await toJpeg(bmp, 2048, 0.86);
-          var o = f, name = f.name, type = f.type || 'image/jpeg';
+          w = bmp.width; h = bmp.height;
+          t = await toJpeg(bmp, 640, 0.8);
+          p = await toJpeg(bmp, 2048, 0.86);
           if (!full) { o = await toJpeg(bmp, 4000, 0.92); name = jpgName(f.name); type = 'image/jpeg'; }
           else if (/hei[cf]/i.test(f.type) || /\.hei[cf]$/i.test(f.name)) {
             try { o = await toJpeg(bmp, Infinity, 0.95); name = jpgName(f.name); type = 'image/jpeg'; } catch (_) {}
           }
-        } finally { bmp.close && bmp.close(); }
-        var files = [['t', t], ['p', p], ['o', o]];
-        for (var j = 0; j < files.length; j++) {
-          var buf = await files[j][1].arrayBuffer();
-          var sha = await putBlob(await G.encrypt(d.key, buf));
-          entries.push({ path: dir + files[j][0] + '/' + n + '.bin', mode: '100644', type: 'blob', sha: sha });
+        } finally { if (bmp.close) bmp.close(); }
+        var parts = [['t', t], ['p', p], ['o', o]];
+        for (var j = 0; j < parts.length; j++) {
+          await put(dir + parts[j][0] + '/' + n + '.bin', await G.encrypt(d.key, await parts[j][1].arrayBuffer()));
         }
         added.push({ n: n, name: name, w: w, h: h, size: o.size, type: type });
       }
-      function tick() { txt.textContent = 'Bild ' + Math.min(done + failed + 1, total) + ' von ' + total + ' wird verschlüsselt und hochgeladen …'; bar.style.width = ((done + failed) / total * 95) + '%'; }
+      function tick() { txt.textContent = 'Bild ' + Math.min(done + failed + 1, total) + ' von ' + total + ' wird verschlüsselt und hochgeladen …'; bar.style.width = ((done + failed) / total * 97) + '%'; }
       tick();
       async function worker() {
         while (next < total) {
           var k = next++;
           try { await one(k); done++; }
-          catch (e) { failed++; var li = document.createElement('li'); li.textContent = e.message.indexOf(picked[k].name) === 0 ? e.message : picked[k].name + ': ' + e.message; $('log').appendChild(li); if (e.status === 401) throw e; }
+          catch (e) {
+            if (e.status === 401 || e.net) throw e;
+            failed++; var li = document.createElement('li'); li.textContent = e.message.indexOf(picked[k].name) === 0 ? e.message : picked[k].name + ': ' + e.message; $('log').appendChild(li);
+          }
           tick();
         }
       }
-      await Promise.all([worker(), worker()]);
-      if (!added.length && !mode) throw new Error('Es konnte kein Bild hochgeladen werden.');
+      await Promise.all([worker(), worker(), worker()]);
+      if (!added.length) throw new Error('Es konnte kein Bild hochgeladen werden.');
       m.images = m.images.concat(added).sort(function (a, b) { return a.n - b.n; });
       txt.textContent = 'Galerie wird gespeichert …';
-      var mb = await G.encrypt(d.key, new TextEncoder().encode(JSON.stringify(m)));
-      entries.push({ path: dir + 'm.bin', mode: '100644', type: 'blob', sha: await putBlob(mb) });
-      await commit(entries, (mode ? 'Galerie ergänzt: ' : 'Neue Galerie: ') + m.title);
+      // Die Übersicht kommt zuletzt – erst dann ist die Galerie für den Kunden sichtbar.
+      await put(dir + 'm.bin', await G.encrypt(d.key, new TextEncoder().encode(JSON.stringify(m))));
       bar.style.width = '100%';
       var bytes = m.images.reduce(function (s, i) { return s + (i.size || 0); }, 0);
       upsert({ id: d.id, pw: pw, title: m.title, date: m.date, until: m.until, count: m.images.length, bytes: bytes, created: m.created });
@@ -363,7 +360,7 @@ details.help b{color:var(--ink)}
       refresh();
     } catch (e) {
       txt.textContent = '';
-      var li = document.createElement('li'); li.textContent = 'Abgebrochen: ' + (e.status === 401 ? 'Der Schlüssel ist ungültig oder abgelaufen.' : e.message); $('log').appendChild(li);
+      var li = document.createElement('li'); li.textContent = 'Abgebrochen: ' + (e.status === 401 ? 'Der Admin-Schlüssel stimmt nicht.' : e.message); $('log').appendChild(li);
     } finally {
       uploading = false; if (wake) try { wake.release(); } catch (_) {}
       $('form').querySelectorAll('input,textarea,button').forEach(function (el) { el.disabled = false; });
@@ -380,7 +377,7 @@ details.help b{color:var(--ink)}
   function showDone(pw, m, n, failed) {
     var g = { pw: pw, title: m.title, until: m.until };
     var box = $('doneBox'); box.hidden = false; $('progBox').hidden = !failed;
-    box.innerHTML = '<div class="done"><h3 style="margin:0;font-size:1.4rem"></h3><p class="hint">In 1–2 Minuten ist die Galerie online – GitHub braucht kurz zum Veröffentlichen.</p><pre></pre><div class="row" style="flex-wrap:wrap"><button class="btn small" type="button" data-a="copy">Nachricht kopieren</button><button class="btn small ghost" type="button" data-a="share" hidden>Teilen …</button></div></div>';
+    box.innerHTML = '<div class="done"><h3 style="margin:0;font-size:1.4rem"></h3><p class="hint">Die Galerie ist ab sofort online.</p><pre></pre><div class="row" style="flex-wrap:wrap"><button class="btn small" type="button" data-a="copy">Nachricht kopieren</button><button class="btn small ghost" type="button" data-a="share" hidden>Teilen …</button></div></div>';
     box.querySelector('h3').textContent = '✓ ' + n + (n === 1 ? ' Bild' : ' Bilder') + ' hochgeladen' + (failed ? ' (' + failed + ' übersprungen)' : '');
     box.querySelector('pre').textContent = message(g);
     box.querySelector('[data-a=copy]').onclick = function () { copy(message(g)); };
@@ -397,9 +394,7 @@ details.help b{color:var(--ink)}
   $('modeCancel').onclick = function () { resetForm(); $('doneBox').hidden = true; $('progBox').hidden = true; };
 
   // ---------- Liste ----------
-  function upsert(g) {
-    list = list.filter(function (x) { return x.id !== g.id; }); list.unshift(g); store('galerie-list', list);
-  }
+  function upsert(g) { list = list.filter(function (x) { return x.id !== g.id; }); list.unshift(g); save('galerie-list', list); }
   async function refresh() {
     try { remote = await scanRemote(); } catch (e) { $('storeTxt').textContent = 'Speicher konnte nicht geprüft werden: ' + e.message; remote = null; }
     renderList();
@@ -408,10 +403,11 @@ details.help b{color:var(--ink)}
     var ul = $('glist'); ul.innerHTML = '';
     if (remote) {
       var used = 0; Object.keys(remote).forEach(function (k) { used += remote[k].bytes; });
-      var pct = used / LIMIT * 100;
-      $('storeTxt').textContent = 'Galerien belegen ' + G.fmtBytes(used) + ' von ca. 1 GB' + (pct > 80 ? ' – bitte alte Galerien löschen.' : '.');
+      var pct = used / FREE * 100;
+      $('storeTxt').textContent = 'Galerien belegen ' + G.fmtBytes(used) + ' von 10 GB kostenlosem Speicher' +
+        (used > FREE ? ' – darüber kostet es ca. ' + ((used - FREE) / 1e9 * 0.015).toLocaleString('de-DE', { maximumFractionDigits: 2 }) + ' $ im Monat.' : '.');
       $('storeBar').style.width = Math.min(100, pct) + '%';
-      $('storeProg').classList.toggle('warn', pct > 80);
+      $('storeProg').classList.toggle('warn', pct > 90);
     }
     var ids = list.map(function (g) { return g.id; });
     if (remote) Object.keys(remote).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
@@ -420,7 +416,7 @@ details.help b{color:var(--ink)}
       var g = list.find(function (x) { return x.id === id; }), r = remote && remote[id];
       var li = document.createElement('li');
       var t = document.createElement('div'); t.className = 't';
-      t.textContent = g ? g.title : 'Galerie ohne Passwort auf diesem Gerät';
+      t.textContent = g ? g.title : (r && !r.hasM ? 'Abgebrochener Upload' : 'Galerie ohne Passwort auf diesem Gerät');
       if (remote && !r) { var tg = document.createElement('span'); tg.className = 'tag'; tg.textContent = 'nicht online'; t.appendChild(tg); }
       var meta = document.createElement('div'); meta.className = 'm';
       var cnt = r ? r.count : g && g.count;
@@ -429,13 +425,13 @@ details.help b{color:var(--ink)}
       if (g) { var pw = document.createElement('div'); pw.className = 'pw'; pw.textContent = 'Passwort: ' + g.pw; li.appendChild(pw); }
       var acts = document.createElement('div'); acts.className = 'acts';
       function btn(label, cls, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'btn small ' + cls; b.textContent = label; b.onclick = fn; acts.appendChild(b); return b; }
-      if (g && r) {
+      if (g && r && r.hasM) {
         btn('Nachricht kopieren', '', function () { copy(message(g)); });
         btn('Ansehen', 'ghost', function () { window.open(SITE + '#k=' + encodeURIComponent(g.pw), '_blank', 'noopener'); });
         btn('Bilder hinzufügen', 'ghost', function () { startAdd(g, this); });
       }
       if (r) btn('Löschen', 'danger', function () { del(id, g, r, this); });
-      else if (g) btn('Aus Liste entfernen', 'ghost', function () { list = list.filter(function (x) { return x.id !== id; }); store('galerie-list', list); renderList(); });
+      else if (g) btn('Aus Liste entfernen', 'ghost', function () { list = list.filter(function (x) { return x.id !== id; }); save('galerie-list', list); renderList(); });
       li.appendChild(acts);
       ul.appendChild(li);
     });
@@ -444,15 +440,17 @@ details.help b{color:var(--ink)}
     if (!confirm('„' + (g ? g.title : 'Diese Galerie') + '“ mit ' + r.count + ' Bildern endgültig löschen? Dein Kunde kann sie danach nicht mehr öffnen.')) return;
     b.disabled = true; b.innerHTML = '<span class="spin"></span> Wird gelöscht';
     try {
-      await commit(r.paths.map(function (p) { return { path: p, mode: '100644', type: 'blob', sha: null }; }), 'Galerie gelöscht: ' + (g ? g.title : id));
-      list = list.filter(function (x) { return x.id !== id; }); store('galerie-list', list);
+      await api('admin/delete', { method: 'POST', json: { id: id } }, 3);
+      list = list.filter(function (x) { return x.id !== id; }); save('galerie-list', list);
       toast('Galerie gelöscht'); refresh();
     } catch (e) { b.disabled = false; b.textContent = 'Löschen'; alert('Löschen fehlgeschlagen: ' + e.message); }
   }
   async function openByPw(pw) {
     var d = await G.derive(pw);
-    var buf = await gh('/repos/' + cfg.repo + '/contents/' + DIR + d.id + '/m.bin?ref=' + encodeURIComponent(cfg.branch), { accept: 'application/vnd.github.raw', raw: true });
-    var m = JSON.parse(new TextDecoder().decode(await G.decrypt(d.key, buf)));
+    var r = await fetch(cfg.store + '/g/' + d.id + '/m.bin', { cache: 'no-store' });
+    if (r.status === 404) { var e = new Error('Zu diesem Passwort gibt es keine Galerie.'); e.status = 404; throw e; }
+    if (!r.ok) throw new Error('Speicher-Fehler ' + r.status);
+    var m = JSON.parse(new TextDecoder().decode(await G.decrypt(d.key, await r.arrayBuffer())));
     return { id: d.id, m: m };
   }
   async function startAdd(g, b) {
@@ -476,12 +474,12 @@ details.help b{color:var(--ink)}
       var o = await openByPw(pw);
       upsert({ id: o.id, pw: pw, title: o.m.title, date: o.m.date, until: o.m.until, count: o.m.images.length, created: o.m.created });
       $('impPw').value = ''; renderList(); toast('Galerie hinzugefügt');
-    } catch (e) { $('impErr').textContent = e.status === 404 ? 'Zu diesem Passwort gibt es keine Galerie.' : e.message; }
+    } catch (e) { $('impErr').textContent = e.status === 404 ? 'Zu diesem Passwort gibt es keine Galerie.' : (e.name === 'OperationError' ? 'Das Passwort passt nicht.' : e.message); }
     b.disabled = false;
   };
 
   if (!window.crypto || !crypto.subtle) $('connErr').textContent = 'Dieser Browser ist zu alt. Bitte nutze einen aktuellen Browser.';
-  if (cfg.token) connect();
+  if (cfg.store && cfg.key) connect();
 })();
 </script>
 </body>
