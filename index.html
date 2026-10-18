@@ -70,7 +70,7 @@ h1{animation:rise 1.2s cubic-bezier(.2,.7,.2,1) both}
 @media(max-width:420px){header.top nav{gap:.9rem}header.top a{font-size:.85rem}}
 .price-note{margin:1rem 0 0;max-width:60ch;font-size:.85rem;color:var(--mute)}
 #anfrage h2{margin-bottom:.8rem}
-.req-intro{margin:0 0 2rem;max-width:56ch;color:var(--mute)}.hero .hero-note{display:inline-flex;align-items:center;gap:.6rem;margin-top:1.3rem;padding:.55rem 1rem;max-width:100%;border:1px solid #f0b44c;border-radius:1.4rem;background:rgba(8,7,12,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#f3eee6;text-decoration:none;font:600 clamp(.8rem,3.4vw,.95rem)/1.3 Manrope,sans-serif}.hero .hero-note::before{content:"";flex:none;width:.55rem;height:.55rem;border-radius:50%;background:#f0b44c}.hero .hero-note:hover,.hero .hero-note:focus-visible{background:#f0b44c;color:#17141c}.hero .hero-note:hover::before,.hero .hero-note:focus-visible::before{background:#17141c}.req-note{margin:0 0 1.6rem;max-width:56ch;padding:.85rem 1.1rem;border-left:3px solid var(--accent);border-radius:0 .6rem .6rem 0;background:rgba(240,180,76,.12);color:var(--ink)}.req-note b{font-weight:700}
+.req-intro{margin:0 0 2rem;max-width:56ch;color:var(--mute)}.hero .hero-note{display:inline-flex;align-items:center;gap:.6rem;margin-top:1.3rem;padding:.55rem 1rem;max-width:100%;border:1px solid #f0b44c;border-radius:1.4rem;background:rgba(8,7,12,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#f3eee6;text-decoration:none;font:600 clamp(.8rem,3.4vw,.95rem)/1.3 Manrope,sans-serif}.hero .hero-note::before{content:"";flex:none;width:.55rem;height:.55rem;border-radius:50%;background:#f0b44c}.hero .hero-note:hover,.hero .hero-note:focus-visible{background:#f0b44c;color:#17141c}.hero .hero-note:hover::before,.hero .hero-note:focus-visible::before{background:#17141c}.req-note{margin:0 0 1.6rem;max-width:56ch;padding:.85rem 1.1rem;border-left:3px solid var(--accent);border-radius:0 .6rem .6rem 0;background:rgba(240,180,76,.12);color:var(--ink)}.req-note b{font-weight:700}.req-hint a{color:inherit;text-underline-offset:3px}footer .legal-links{display:flex;gap:1rem}footer .legal-links a{display:inline-block;padding:.3rem 0}dialog.legal{box-sizing:border-box;width:min(46rem,calc(100vw - 1.5rem));max-height:calc(100vh - 1.5rem);max-height:calc(100dvh - 1.5rem);margin:auto;padding:0;border:1px solid var(--line);border-radius:1rem;background:var(--bg);color:var(--ink);overflow:hidden}dialog.legal[open]{display:flex;flex-direction:column}dialog.legal::backdrop{background:rgba(8,7,12,.72)}.legal-bar{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.8rem 1rem .8rem clamp(1rem,4vw,1.8rem);border-bottom:1px solid var(--line)}.legal-bar h2{margin:0;font-size:clamp(1.3rem,4.5vw,1.8rem)}.legal-x{min-height:44px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:2rem;padding:.5rem 1.1rem;font:600 .95rem Manrope,sans-serif;cursor:pointer}.legal-x:hover{border-color:var(--accent)}.legal-body{overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:1rem clamp(1rem,4vw,1.8rem) 1.8rem;line-height:1.6;font-size:.95rem}.legal-body h3{font-family:Syne,sans-serif;font-size:1.05rem;margin:1.6rem 0 .4rem;letter-spacing:-.01em}.legal-body h3:first-child{margin-top:.4rem}.legal-body p{margin:.4rem 0}.legal-body ul{margin:.4rem 0;padding-left:1.2rem}.legal-body li{margin:.3rem 0}.legal-body a{color:var(--accent);text-underline-offset:3px;overflow-wrap:anywhere}.legal-body .stand{margin-top:1.6rem;color:var(--mute);font-size:.85rem}body.legal-open{overflow:hidden}
 .req{display:grid;gap:2rem;grid-template-columns:1fr;align-items:start}
 @media(min-width:800px){.req{grid-template-columns:minmax(300px,380px) 1fr;gap:3rem}}
 .req-cal{max-width:420px;width:100%}
@@ -192,7 +192,7 @@ body{overflow-x:clip}
 <div class="req-quote" id="rqQuote" aria-live="polite"></div>
 <p class="req-err" id="rqErr" role="alert"></p>
 <button type="submit" class="req-send">Anfrage erstellen</button>
-<p class="req-hint">Danach siehst du deine fertige Nachricht und kannst sie mir per E-Mail oder Instagram schicken.</p>
+<p class="req-hint">Danach siehst du deine fertige Nachricht und kannst sie mir per E-Mail oder Instagram schicken. Diese Seite schickt deine Angaben nicht von selbst irgendwohin. Erst wenn du die Nachricht abschickst, kommt sie bei mir an. Mehr dazu in der <a href="#datenschutz" data-legal="datenschutz">Datenschutzerklärung</a>.</p>
 <div class="req-opts" id="rqOpts" hidden="">
 <strong>Deine Anfrage ist noch nicht abgeschickt.</strong>
 <p class="req-ok" id="rqOk" aria-live="polite"></p>
@@ -216,7 +216,68 @@ body{overflow-x:clip}
 <div class="social"><a href="https://www.instagram.com/antifazkee" target="_blank" rel="noopener noreferrer">Instagram: @antifazkee</a><a href="https://www.tiktok.com/@antifazkee" target="_blank" rel="noopener noreferrer">TikTok: @antifazkee</a></div>
 </div>
 </section>
-<footer><span>© <span id="yr"></span> Robin Langer, Leipzig</span><span>Alle Bilder: Robin Langer · Ortsdaten: <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0)</span></footer>
+<footer><span>© <span id="yr"></span> Robin Langer, Leipzig</span><span>Alle Bilder: Robin Langer · Ortsdaten: <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0)</span><span class="legal-links"><a href="#impressum" data-legal="impressum">Impressum</a><a href="#datenschutz" data-legal="datenschutz">Datenschutz</a></span></footer>
+<dialog class="legal" id="dlg-impressum" aria-labelledby="hImp">
+<div class="legal-bar"><h2 id="hImp">Impressum</h2><button type="button" class="legal-x">Schließen</button></div>
+<div class="legal-body">
+<h3>Angaben gemäß § 5 DDG</h3>
+<p>Robin Langer<br><span class="addr">Maiglöckchenweg 14<br>04159 Leipzig</span><br>Deutschland</p>
+<h3>Kontakt</h3>
+<p>E-Mail: <a class="lmail" href="mailto:robin.langer2007@gmail.com">robin.langer2007@gmail.com</a><br>Instagram: <a href="https://www.instagram.com/antifazkee" target="_blank" rel="noopener noreferrer">@antifazkee</a></p>
+<h3>Verantwortlich für den Inhalt (§ 18 Abs. 2 MStV)</h3>
+<p>Robin Langer, Anschrift wie oben.</p>
+<h3>Urheberrecht</h3>
+<p>Alle Bilder und Texte auf dieser Seite sind urheberrechtlich geschützt (© Robin Langer), sofern nicht anders angegeben. Eine Nutzung ist nur mit meiner Zustimmung erlaubt. Die Ortsdaten stammen von <a href="https://www.geonames.org" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0).</p>
+<h3>Haftung für Inhalte</h3>
+<p>Ich erstelle die Inhalte dieser Seite mit Sorgfalt. Für Richtigkeit, Vollständigkeit und Aktualität kann ich aber keine Gewähr übernehmen. Wenn ich von Rechtsverletzungen erfahre, entferne ich die betroffenen Inhalte umgehend.</p>
+<h3>Haftung für Links</h3>
+<p>Diese Seite verlinkt auf externe Seiten (Instagram, TikTok, GeoNames). Auf deren Inhalte habe ich keinen Einfluss, verantwortlich ist jeweils der Anbieter. Zum Zeitpunkt der Verlinkung waren keine Rechtsverstöße erkennbar. Sobald ich von einem Verstoß erfahre, entferne ich den Link.</p>
+<h3>Verbraucherstreitbeilegung</h3>
+<p>Ich bin nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+</div>
+</dialog>
+<dialog class="legal" id="dlg-datenschutz" aria-labelledby="hDs">
+<div class="legal-bar"><h2 id="hDs">Datenschutz</h2><button type="button" class="legal-x">Schließen</button></div>
+<div class="legal-body">
+<h3>1. Wer ist verantwortlich?</h3>
+<p>Verantwortlich im Sinne der Datenschutz-Grundverordnung (DSGVO) bin ich:</p>
+<p>Robin Langer<br><span class="addr">Maiglöckchenweg 14<br>04159 Leipzig</span><br>E-Mail: <a class="lmail" href="mailto:robin.langer2007@gmail.com">robin.langer2007@gmail.com</a></p>
+<h3>2. Das Wichtigste in Kürze</h3>
+<ul>
+<li>Diese Seite setzt keine Cookies und enthält kein Tracking und keine Statistik-Werkzeuge.</li>
+<li>Das Anfrageformular schickt nichts von selbst ab. Die Nachricht entsteht in deinem Browser und geht erst raus, wenn du sie selbst verschickst.</li>
+<li>Beim Laden der Schriftarten wird deine IP-Adresse an Google übertragen (siehe Punkt 4).</li>
+</ul>
+<h3>3. Bereitstellung der Seite (Hosting)</h3>
+<p>Die Seite wird unter langer-photo.de über GitHub Pages bereitgestellt. Verantwortlich ist je nach Fall GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande, oder GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA. Beim Aufruf der Seite wird nach Angaben von GitHub die IP-Adresse der Besucher zu Sicherheitszwecken protokolliert und gespeichert, auch wenn du nicht bei GitHub angemeldet bist. Dazu kommen technisch notwendige Verbindungsdaten wie Datum und Uhrzeit, Angaben zu Browser und Gerät und die aufgerufene Adresse. Das ist nötig, damit die Seite ausgeliefert werden kann und sicher läuft. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (mein berechtigtes Interesse an einer sicheren und stabilen Website). Ich führe diese Daten nicht mit anderen Daten zusammen.</p>
+<p>Dabei können Daten in die USA übermittelt werden. GitHub nennt dafür nach eigenen Angaben das EU-U.S. Data Privacy Framework und Standardvertragsklauseln. Mehr dazu in der <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von GitHub</a>.</p>
+<p>Zusätzlich ist die Seite über eine Adresse der Plattform von Anthropic (claude.ai) erreichbar. Wenn du sie dort aufrufst, verarbeitet der Anbieter ähnliche Verbindungsdaten. Für Nutzer in Europa ist nach der Datenschutzerklärung des Anbieters die Anthropic Ireland, Limited, 6th Floor, South Bank House, Barrow Street, Dublin 4, D04 TR29, Irland verantwortlich. Dabei können Daten auch in die USA und in andere Länder übermittelt werden. Der Anbieter stützt sich dafür nach eigenen Angaben auf Angemessenheitsbeschlüsse und Standardvertragsklauseln. Mehr dazu unter <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer">anthropic.com/legal/privacy</a>.</p>
+<h3>4. Schriftarten (Google Fonts)</h3>
+<p>Für die Darstellung nutzt die Seite die Schriftarten „Syne“ und „Manrope“ von Google Fonts. Dafür lädt dein Browser die Schriftdateien beim Aufruf von Servern der Google Ireland Limited (Gordon House, Barrow Street, Dublin 4, Irland). Dabei wird deine IP-Adresse an Google übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (mein Interesse an einer einheitlichen und ansprechenden Darstellung). Mehr dazu unter <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.</p>
+<h3>5. Anfrageformular und Kontakt</h3>
+<p>Im Formular kannst du Wunschtag, Beginn, Dauer, Ort, deinen Namen, Kontaktangaben und eine Nachricht eintragen. Wenn du Bilder als Favoriten gemerkt hast, werden sie als Stil-Beispiele in die Nachricht geschrieben. Die Seite überträgt diese Angaben nicht selbst an einen Server. Aus deinen Eingaben entsteht in deinem Browser ein Nachrichtentext. Diesen kannst du:</p>
+<ul>
+<li>mit deinem E-Mail-Programm verschicken (es gelten die Datenschutzregeln deines E-Mail-Anbieters),</li>
+<li>über den Gmail-Link verschicken (dabei überträgt dein Browser den Text an Google, um das Schreibfenster zu füllen, es gelten die Regeln von Google),</li>
+<li>per Instagram-Nachricht verschicken (der Link öffnet Instagram, es gelten die Regeln von Meta Platforms Ireland Limited),</li>
+<li>oder kopieren und selbst einfügen, wo du möchtest.</li>
+</ul>
+<p>Aus deiner Ortsangabe schätzt die Seite eine Anfahrtspauschale. Diese Berechnung läuft komplett in deinem Browser, mit einer Tabelle von Postleitzahlen, die in die Seite eingebaut ist (Daten von GeoNames). Deine Ortsangabe wird dafür nirgendwohin übertragen.</p>
+<p>Wenn deine Nachricht bei mir ankommt, egal ob über das Formular oder direkt per E-Mail, Instagram oder TikTok, verarbeite ich die Angaben, um deine Anfrage zu beantworten und einen möglichen Auftrag vorzubereiten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen auf deine Anfrage) und, wenn es nur um eine Antwort geht, lit. f DSGVO. Ich gebe die Angaben nicht an Dritte weiter, außer ich bin gesetzlich dazu verpflichtet. Wie lange ich sie speichere, steht unter Punkt 8.</p>
+<h3>6. Speicherung in deinem Browser</h3>
+<p>Die Seite speichert zwei Dinge lokal in deinem Browser (Local Storage), nicht auf einem Server: den Entwurf deines Formulars, damit nichts verloren geht, wenn du die Seite verlässt, und die Bilder, die du als Favoriten markiert hast. Diese Daten werden nicht an mich übertragen. Favoriten erfahre ich nur, wenn du sie mit einer Anfrage mitschickst. Die Speicherung ist nötig, um die von dir gewünschten Funktionen bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG, Art. 6 Abs. 1 lit. f DSGVO). Du kannst Favoriten in der Galerie wieder entfernen oder alle gespeicherten Daten über die Einstellungen deines Browsers löschen.</p>
+<h3>7. Links zu Instagram, TikTok und anderen Seiten</h3>
+<p>Die Seite enthält Links zu Instagram (Meta Platforms Ireland Limited), TikTok (TikTok Technology Limited) und GeoNames. Das sind einfache Links, keine eingebetteten Inhalte. Daten fließen erst, wenn du einen Link anklickst. Dann gelten die Datenschutzbestimmungen des jeweiligen Anbieters.</p>
+<h3>8. Wie lange speichere ich Daten?</h3>
+<p>Angaben aus einer Anfrage speichere ich nur so lange, wie ich sie für die Bearbeitung brauche. Danach lösche ich sie, außer gesetzliche Aufbewahrungspflichten verlangen etwas anderes, zum Beispiel steuerrechtliche nach einem Auftrag.</p>
+<h3>9. Deine Rechte</h3>
+<p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch gegen eine Verarbeitung aufgrund berechtigter Interessen (Art. 21). Eine erteilte Einwilligung kannst du jederzeit widerrufen (Art. 7 Abs. 3). Schreib mir dazu einfach eine E-Mail an <a class="lmail" href="mailto:robin.langer2007@gmail.com">robin.langer2007@gmail.com</a>.</p>
+<p>Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren, zum Beispiel bei der für mich zuständigen: Sächsische Datenschutz- und Transparenzbeauftragte, Postfach 11 01 32, 01330 Dresden (<a href="https://www.datenschutz.sachsen.de" target="_blank" rel="noopener noreferrer">datenschutz.sachsen.de</a>).</p>
+<h3>10. Keine automatisierten Entscheidungen</h3>
+<p>Eine automatisierte Entscheidungsfindung oder ein Profiling findet nicht statt.</p>
+<p class="stand">Stand: Oktober 2026</p>
+</div>
+</dialog>
 <div class="toast" id="toast" role="status"></div>
 <button type="button" class="favpill" id="favPill" hidden=""><span class="h">♥</span> <span id="favN"></span> gemerkt, jetzt anfragen</button>
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Bildansicht">
@@ -321,7 +382,7 @@ function mailPriceLines(){var m=sums(),L=[''];
 if(m.fee!=null)L.push('Anfahrtspauschale: ca. '+eur(m.fee));
 if(m.base!=null)L.push('Preis (Schätzung): ab '+eur(m.base+m.extra+(m.fee||0))+(m.fee==null?' (ohne Anfahrt)':''));
 return L.length>1?L:[]}
-form.addEventListener('input',saveDraft);form.addEventListener('change',function(e){if(e.target.id==='rqArt'||e.target.id==='rqDur')paintQuote();saveDraft()});var hn=document.querySelector('.hero-note');if(hn)hn.addEventListener('click',function(){var sa=$('rqArt');if(sa.value!=='Abiball'){sa.value='Abiball';paintQuote();saveDraft()}});
+form.addEventListener('input',saveDraft);form.addEventListener('change',function(e){if(e.target.id==='rqArt'||e.target.id==='rqDur')paintQuote();saveDraft()});var hn=document.querySelector('.hero-note');if(hn)hn.addEventListener('click',function(){var sa=$('rqArt');if(sa.value!=='Abiball'){sa.value='Abiball';paintQuote();saveDraft()}});(function(){var cur=null,last=null;function openL(n){var d=$('dlg-'+n);if(!d||typeof d.showModal!=='function')return;if(cur&&cur!==d&&cur.open)cur.close();if(!d.open){last=document.activeElement;d.showModal()}cur=d;document.body.classList.add('legal-open');var b=d.querySelector('.legal-body');if(b)b.scrollTop=0}document.addEventListener('click',function(e){var t=e.target;if(!t||!t.closest)return;var a=t.closest('[data-legal]');if(a){e.preventDefault();openL(a.getAttribute('data-legal'));return}var x=t.closest('.legal-x');if(x){var dd=x.closest('dialog');if(dd)dd.close();return}if(t.tagName==='DIALOG'&&t.classList.contains('legal'))t.close()});['impressum','datenschutz'].forEach(function(n){var d=$('dlg-'+n);if(d)d.addEventListener('close',function(){document.body.classList.remove('legal-open');cur=null;if(last&&last.focus){try{last.focus()}catch(_){}}})});if(/^#(impressum|datenschutz)$/.test(location.hash))openL(location.hash.slice(1))})();
 form.addEventListener('submit',function(e){
 e.preventDefault();
 var errs=[];
@@ -387,7 +448,7 @@ items.push({id:'fav',t:'♥ Favoriten'+(nf?' ('+nf+')':'')});
 var kk=catF+'|'+items.map(function(i){return i.id+':'+i.t}).join(',');if(kk===chipKey&&c.firstChild)return;chipKey=kk;
 c.textContent='';
 items.forEach(function(k){var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=k.t;b.setAttribute('aria-pressed',catF===k.id);b.addEventListener('click',function(){catF=k.id;buzz();renderGallery();syncFav();var nb=c.querySelector('[aria-pressed="true"]');if(nb)nb.focus()});c.appendChild(b)})}
-function renderTexts(){$('tag').textContent=S.texts.tagline;$('abt').textContent=S.texts.about;var m=$('mail');m.textContent=S.texts.email;m.href='mailto:'+S.texts.email}
+function renderTexts(){$('tag').textContent=S.texts.tagline;$('abt').textContent=S.texts.about;var m=$('mail');m.textContent=S.texts.email;m.href='mailto:'+S.texts.email;document.querySelectorAll('.lmail').forEach(function(a){a.textContent=S.texts.email;a.href='mailto:'+S.texts.email})}
 function renderHero(){var sl=$('slides');sl.innerHTML='';clearInterval(timer);var si=0,imgs=S.photos.map(function(p){var e=document.createElement('img');e.src=p.src;e.alt='';sl.appendChild(e);return e});
 if(!imgs.length)return;setTimeout(function(){imgs[0].classList.add('on')},60);
 if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&imgs.length>1){timer=setInterval(function(){imgs[si].classList.remove('on');si=(si+1)%imgs.length;imgs[si].classList.add('on')},6500)}}
@@ -487,7 +548,7 @@ try{
 var c=document.documentElement.cloneNode(true);
 c.querySelectorAll('.admin-ui').forEach(function(n){n.remove()});
 c.querySelector('#groups').innerHTML='';c.querySelector('#slides').innerHTML='';
-c.querySelector('#lb').className='lb';c.querySelector('#lbImg').removeAttribute('src');c.querySelector('#lbCap').textContent='';c.querySelector('#yr').textContent='';['rqRefRow','chips','toast','favN','lbPos','rqQuote'].forEach(function(id){var n=c.querySelector('#'+id);if(n)n.textContent=''});var fpl=c.querySelector('#favPill');if(fpl)fpl.setAttribute('hidden','');var rdn=c.querySelector('#rqDist');if(rdn){rdn.textContent='';rdn.setAttribute('hidden','')}var ro=c.querySelector('#rqOpts');if(ro){ro.setAttribute('hidden','');['rqMailto','rqGmail'].forEach(function(id){var n=c.querySelector('#'+id);if(n)n.setAttribute('href','#')});var rt=c.querySelector('#rqText');if(rt)rt.textContent='';var rk=c.querySelector('#rqOk');if(rk)rk.textContent='';var ra=c.querySelector('#rqAddr');if(ra)ra.textContent=''}
+c.querySelector('#lb').className='lb';c.querySelector('#lbImg').removeAttribute('src');c.querySelector('#lbCap').textContent='';c.querySelector('#yr').textContent='';['rqRefRow','chips','toast','favN','lbPos','rqQuote'].forEach(function(id){var n=c.querySelector('#'+id);if(n)n.textContent=''});var fpl=c.querySelector('#favPill');if(fpl)fpl.setAttribute('hidden','');var rdn=c.querySelector('#rqDist');if(rdn){rdn.textContent='';rdn.setAttribute('hidden','')}c.querySelectorAll('dialog.legal').forEach(function(d){d.removeAttribute('open')});var cbd=c.querySelector('body');if(cbd)cbd.classList.remove('legal-open');var ro=c.querySelector('#rqOpts');if(ro){ro.setAttribute('hidden','');['rqMailto','rqGmail'].forEach(function(id){var n=c.querySelector('#'+id);if(n)n.setAttribute('href','#')});var rt=c.querySelector('#rqText');if(rt)rt.textContent='';var rk=c.querySelector('#rqOk');if(rk)rk.textContent='';var ra=c.querySelector('#rqAddr');if(ra)ra.textContent=''}
 c.querySelector('#pdata').textContent=JSON.stringify(S).replace(/</g,'\\u003c');
 var html='<!DOCTYPE html>\n'+c.outerHTML;
 if(html.length>15500000){pub.disabled=false;st.textContent='Zu viele Bilder für eine Seite. Bitte einige löschen.';return}
