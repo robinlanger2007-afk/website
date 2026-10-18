@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="de" data-theme="dark" style="color-scheme: dark;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Kundengalerie – Robin Langer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&amp;family=Manrope:wght@400;500;600&amp;display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+.lock{display:flex;align-items:center;padding:clamp(2rem,8vw,6rem) 0}
+.lock .wrap{width:100%;display:grid;gap:2.5rem;align-items:end}
+@media(min-width:900px){.lock .wrap{grid-template-columns:1.2fr 1fr}}
+.lock h1 .a{color:var(--accent)}
+.lead{font-size:clamp(1rem,2.4vw,1.25rem);color:var(--mute);margin:1.3rem 0 0;max-width:34ch}
+.pwform{display:grid;gap:.8rem;max-width:460px;width:100%}
+.pwrow{position:relative}
+.pwrow input{font-size:1.15rem;padding:.95rem 5.5rem .95rem 1rem;letter-spacing:.04em}
+.pwrow button{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--mute);font:600 .9rem Manrope,sans-serif;padding:.6rem .8rem;cursor:pointer;min-height:44px}
+.pwform .btn{justify-self:start;padding:.9rem 1.8rem;font-size:1.05rem}
+.ghead{padding:clamp(1.5rem,5vw,3.5rem) 0 clamp(1.5rem,4vw,2.5rem)}
+.ghead h1{font-size:clamp(2.6rem,10vw,6.5rem);overflow-wrap:anywhere}
+.gmeta{margin:1.1rem 0 0;color:var(--mute);font-size:1.02rem}
+.gnote{margin:1rem 0 0;max-width:62ch;white-space:pre-line}
+.until{display:inline-flex;align-items:center;gap:.55rem;margin-top:1.2rem;padding:.45rem .95rem;border:1px solid var(--accent);border-radius:1.4rem;font-weight:600;font-size:.9rem}
+.until::before{content:"";width:.5rem;height:.5rem;border-radius:50%;background:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.8rem}
+.dlbox{margin-top:1rem;display:grid;gap:.6rem;max-width:640px}
+.dlbox:empty{display:none}
+.parts{display:flex;flex-wrap:wrap;gap:.5rem}
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.grid{--h:clamp(150px,22vw,260px);display:flex;flex-wrap:wrap;gap:clamp(.4rem,1vw,.8rem)}
+.grid::after{content:"";flex-grow:9999}
+.grid figure{position:relative;margin:0;flex:var(--r) 1 calc(var(--r) * var(--h));aspect-ratio:var(--r);background:var(--card);overflow:hidden;min-width:0}
+@media(max-width:520px){.grid{--h:120px}}
+.grid figure>button.open{all:unset;display:block;width:100%;height:100%;cursor:zoom-in}
+.grid img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s,transform .5s}
+.grid img.in{opacity:1}
+.grid figure:hover img{transform:scale(1.03)}
+.grid .sel{position:absolute;top:.45rem;right:.45rem;width:44px;height:44px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;background:rgba(10,9,14,.55);color:#fff;cursor:pointer;opacity:0;transition:opacity .2s}
+.grid .sel svg{width:20px;height:20px}
+.grid figure:hover .sel,.grid .sel:focus-visible,.selecting .grid .sel,.grid figure.on .sel{opacity:1}
+@media (hover:none){.grid .sel{opacity:.85}}
+.grid figure.on{outline:3px solid var(--accent);outline-offset:-3px}
+.grid figure.on .sel{background:var(--accent);color:#17141c}
+.selbar{position:fixed;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:20;display:flex;align-items:center;gap:.5rem;flex-wrap:nowrap;justify-content:center;white-space:nowrap;padding:.55rem .6rem .55rem 1.2rem;border-radius:2rem;background:var(--ink);color:var(--bg);box-shadow:0 10px 40px rgba(0,0,0,.4);max-width:calc(100vw - 1.5rem)}
+.selbar b{font-weight:700}
+.selbar .btn.ghost{color:var(--bg);border-color:transparent}
+.lb{position:fixed;inset:0;z-index:50;background:rgba(6,5,9,.96);display:none;align-items:center;justify-content:center;padding:calc(3.5rem + env(safe-area-inset-top,0px)) 1rem calc(6rem + env(safe-area-inset-bottom,0px));touch-action:none}
+.lb.open{display:flex}
+.lb img{max-width:100%;max-height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.lb .ic{position:absolute;background:none;border:0;color:#f3eee6;font-size:2rem;cursor:pointer;padding:.6rem 1rem;line-height:1;min-width:44px;min-height:44px}
+.lb .x{top:env(safe-area-inset-top,0px);right:.5rem}
+.lb .pv{left:.2rem;top:50%;transform:translateY(-50%)}.lb .nx{right:.2rem;top:50%;transform:translateY(-50%)}
+.lb .pos{position:absolute;top:calc(1rem + env(safe-area-inset-top,0px));left:1.2rem;color:#cfc9d6;font-size:.9rem}
+.lb .bar{position:absolute;left:0;right:0;bottom:calc(1rem + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:0 1rem;color:#cfc9d6;font-size:.85rem;text-align:center}
+.lb .bar .name{max-width:90vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb .wait{position:absolute;color:#f3eee6}
+.empty{padding:3rem 0;color:var(--mute)}
+@media(max-width:420px){header.top nav{gap:.9rem}header.top a{font-size:.85rem}}
+</style>
+</head>
+<body>
+<header class="top"><a href="/">Robin Langer</a><nav><a href="/#portfolio">Portfolio</a><a href="/#kontakt">Kontakt</a></nav></header>
+
+<main id="lock" class="lock">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Kundengalerie</p>
+      <h1>Deine<br><span class="a">Bilder.</span></h1>
+      <p class="lead">Gib das Passwort ein, das du von mir bekommen hast. Danach kannst du dir alle Fotos ansehen und herunterladen.</p>
+    </div>
+    <form class="pwform" id="pwform" autocomplete="off">
+      <label for="pw">Passwort</label>
+      <div class="pwrow">
+        <input id="pw" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+        <button type="button" id="eye" aria-pressed="false">Zeigen</button>
+      </div>
+      <button class="btn" type="submit" id="go">Galerie öffnen</button>
+      <p class="err" id="err" role="alert"></p>
+      <p class="hint">Die Bilder sind verschlüsselt gespeichert und werden erst in deinem Browser mit deinem Passwort entschlüsselt.</p>
+    </form>
+  </div>
+</main>
+
+<main id="gal" hidden>
+  <div class="wrap">
+    <section class="ghead">
+      <p class="eyebrow">Kundengalerie</p>
+      <h1 id="gt"></h1>
+      <p class="gmeta" id="gmeta"></p>
+      <p class="gnote" id="gnote" hidden></p>
+      <p class="until" id="until" hidden></p>
+      <div class="actions">
+        <button class="btn" id="dlAll" type="button">Alle herunterladen</button>
+        <button class="btn ghost" id="selMode" type="button" aria-pressed="false">Bilder auswählen</button>
+        <button class="btn ghost" id="logout" type="button">Abmelden</button>
+      </div>
+      <div class="dlbox" id="dlbox" aria-live="polite"></div>
+    </section>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" hidden>In dieser Galerie sind noch keine Bilder.</p>
+  </div>
+</main>
+
+<div class="selbar" id="selbar" hidden>
+  <span><b id="selN">0</b> ausgewählt</span>
+  <button class="btn small" id="dlSel" type="button">Herunterladen</button>
+  <button class="btn small ghost" id="selClear" type="button">Fertig</button>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Bildansicht">
+  <span class="pos" id="lbPos"></span>
+  <span class="wait spin" id="lbWait" hidden></span>
+  <img id="lbImg" alt="">
+  <button class="ic x" id="lbX" type="button" aria-label="Schließen">×</button>
+  <button class="ic pv" id="lbP" type="button" aria-label="Vorheriges Bild">‹</button>
+  <button class="ic nx" id="lbN" type="button" aria-label="Nächstes Bild">›</button>
+  <div class="bar"><span class="name" id="lbName"></span><button class="btn small" id="lbDl" type="button">Herunterladen</button></div>
+</div>
+
+<footer><span>© <span id="yr"></span> Robin Langer, Leipzig</span><nav><a href="/#impressum">Impressum</a><a href="/#datenschutz">Datenschutz</a></nav></footer>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  'use strict';
+  var G = window.Galerie, $ = function (id) { return document.getElementById(id); };
+  var BASE = new URL('g/', location.href.split('#')[0]).href;
+  var PART_LIMIT = 400e6;
+  var S = { key: null, id: null, m: null, sel: new Set(), selecting: false, thumbs: {}, prev: {}, prevOrder: [], cur: -1 };
+  $('yr').textContent = new Date().getFullYear();
+
+  // ---------- Entsperren ----------
+  $('eye').onclick = function () {
+    var show = $('pw').type === 'password';
+    $('pw').type = show ? 'text' : 'password';
+    this.textContent = show ? 'Verbergen' : 'Zeigen';
+    this.setAttribute('aria-pressed', show);
+  };
+  $('pwform').onsubmit = function (e) { e.preventDefault(); unlock($('pw').value); };
+
+  async function unlock(pw) {
+    if (!pw.trim()) return;
+    var go = $('go'); go.disabled = true; go.innerHTML = '<span class="spin"></span> Wird geöffnet…'; $('err').textContent = '';
+    try {
+      var d = await G.derive(pw);
+      var r = await fetch(BASE + d.id + '/m.bin', { cache: 'no-store' });
+      if (r.status === 404) throw new Error('Zu diesem Passwort gibt es keine Galerie. Bitte prüfe die Schreibweise.');
+      if (!r.ok) throw new Error('Die Galerie konnte gerade nicht geladen werden. Bitte versuch es gleich noch einmal.');
+      var m = JSON.parse(new TextDecoder().decode(await G.decrypt(d.key, await r.arrayBuffer())));
+      S.key = d.key; S.id = d.id; S.m = m;
+      try { sessionStorage.setItem('galerie-pw', pw); } catch (_) {}
+      render();
+    } catch (err) {
+      $('err').textContent = err.name === 'OperationError' ? 'Das Passwort passt nicht.' : err.message;
+      try { sessionStorage.removeItem('galerie-pw'); } catch (_) {}
+    } finally { go.disabled = false; go.textContent = 'Galerie öffnen'; }
+  }
+
+  $('logout').onclick = function () { try { sessionStorage.removeItem('galerie-pw'); } catch (_) {} location.replace(location.pathname); };
+
+  // ---------- Galerie ----------
+  function render() {
+    var m = S.m, imgs = m.images || [];
+    document.title = (m.title || 'Galerie') + ' – Robin Langer';
+    $('gt').textContent = m.title || 'Deine Galerie';
+    var total = imgs.reduce(function (s, i) { return s + (i.size || 0); }, 0);
+    $('gmeta').textContent = [m.date ? G.fmtDate(m.date) : '', imgs.length + (imgs.length === 1 ? ' Bild' : ' Bilder'), total ? G.fmtBytes(total) : ''].filter(Boolean).join(' · ');
+    if (m.note) { $('gnote').textContent = m.note; $('gnote').hidden = false; }
+    if (m.until) { $('until').textContent = 'Download möglich bis ' + G.fmtDate(m.until); $('until').hidden = false; }
+    $('empty').hidden = imgs.length > 0;
+    $('dlAll').hidden = $('selMode').hidden = imgs.length === 0;
+    var grid = $('grid'); grid.innerHTML = '';
+    imgs.forEach(function (it, i) {
+      var f = document.createElement('figure');
+      f.style.setProperty('--r', ((it.w || 3) / (it.h || 2)).toFixed(4));
+      f.dataset.i = i;
+      f.innerHTML = '<button class="open" type="button" aria-label="Bild ' + (i + 1) + ' öffnen"><img alt=""></button>' +
+        '<button class="sel" type="button" aria-pressed="false" aria-label="Bild ' + (i + 1) + ' auswählen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>';
+      grid.appendChild(f);
+      io.observe(f);
+    });
+    $('lock').hidden = true; $('gal').hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  $('grid').addEventListener('click', function (e) {
+    var f = e.target.closest('figure'); if (!f) return;
+    var i = +f.dataset.i;
+    if (e.target.closest('.sel') || S.selecting) toggleSel(i, f); else openLb(i);
+  });
+
+  // Vorschaubilder nach und nach laden
+  var queue = [], active = 0;
+  var io = new IntersectionObserver(function (ents) {
+    ents.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); queue.push(+en.target.dataset.i); pump(); } });
+  }, { rootMargin: '800px 0px' });
+  function pump() {
+    while (active < 5 && queue.length) {
+      active++;
+      (function (i) {
+        getImg('t', i).then(function (url) {
+          var img = $('grid').children[i].querySelector('img');
+          img.onload = function () { img.classList.add('in'); };
+          img.src = url;
+        }).catch(function () {}).finally(function () { active--; pump(); });
+      })(queue.shift());
+    }
+  }
+  async function fetchDec(kind, n) {
+    var r = await fetch(BASE + S.id + '/' + kind + '/' + n + '.bin');
+    if (!r.ok) throw new Error('Datei fehlt');
+    return G.decrypt(S.key, await r.arrayBuffer());
+  }
+  async function getImg(kind, i) {
+    var it = S.m.images[i], cache = kind === 't' ? S.thumbs : S.prev;
+    if (cache[i]) return cache[i];
+    var p = fetchDec(kind, it.n).then(function (buf) { return URL.createObjectURL(new Blob([buf], { type: 'image/jpeg' })); });
+    cache[i] = p;
+    if (kind === 'p') {
+      S.prevOrder.push(i);
+      while (S.prevOrder.length > 12) { var old = S.prevOrder.shift(); var u = S.prev[old]; delete S.prev[old]; u.then(URL.revokeObjectURL); }
+    }
+    try { return await p; } catch (e) { delete cache[i]; throw e; }
+  }
+
+  // ---------- Auswahl ----------
+  function toggleSel(i, f) {
+    f = f || $('grid').children[i];
+    if (S.sel.has(i)) S.sel.delete(i); else S.sel.add(i);
+    var on = S.sel.has(i); f.classList.toggle('on', on); f.querySelector('.sel').setAttribute('aria-pressed', on);
+    updSel();
+  }
+  function updSel() {
+    $('selN').textContent = S.sel.size;
+    $('selbar').hidden = !(S.selecting || S.sel.size);
+    $('dlSel').disabled = !S.sel.size;
+  }
+  $('selMode').onclick = function () {
+    S.selecting = !S.selecting;
+    this.setAttribute('aria-pressed', S.selecting);
+    this.textContent = S.selecting ? 'Auswahl beenden' : 'Bilder auswählen';
+    document.body.classList.toggle('selecting', S.selecting);
+    updSel();
+  };
+  $('selClear').onclick = function () {
+    S.sel.forEach(function (i) { var f = $('grid').children[i]; f.classList.remove('on'); f.querySelector('.sel').setAttribute('aria-pressed', 'false'); });
+    S.sel.clear();
+    if (S.selecting) $('selMode').click(); else updSel();
+  };
+  $('dlSel').onclick = function () {
+    var idx = Array.from(S.sel).sort(function (a, b) { return a - b; });
+    download(idx, 'auswahl');
+  };
+  $('dlAll').onclick = function () { download(S.m.images.map(function (_, i) { return i; }), ''); };
+
+  // ---------- Download ----------
+  function save(blob, name) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 120000);
+  }
+  async function original(i) {
+    var it = S.m.images[i];
+    return new Blob([await fetchDec('o', it.n)], { type: it.type || 'image/jpeg' });
+  }
+  var busy = false;
+  async function download(idx, suffix) {
+    if (busy || !idx.length) return;
+    var box = $('dlbox');
+    if (idx.length === 1) {
+      busy = true; box.innerHTML = '<p class="hint">Bild wird vorbereitet…</p>';
+      try { save(await original(idx[0]), S.m.images[idx[0]].name); box.innerHTML = ''; }
+      catch (e) { box.innerHTML = '<p class="err">Download fehlgeschlagen. Bitte versuch es noch einmal.</p>'; }
+      busy = false; return;
+    }
+    // In Teile aufteilen, damit der Browser nicht zu viel auf einmal im Speicher halten muss
+    var parts = [], cur = [], sz = 0;
+    idx.forEach(function (i) {
+      var s = S.m.images[i].size || 0;
+      if (cur.length && sz + s > PART_LIMIT) { parts.push(cur); cur = []; sz = 0; }
+      cur.push(i); sz += s;
+    });
+    if (cur.length) parts.push(cur);
+    var base = G.slug(S.m.title) + (suffix ? '-' + suffix : '');
+    if (parts.length === 1) { box.innerHTML = ''; return zipPart(parts[0], base + '.zip', null); }
+    box.innerHTML = '<p class="hint">Die Bilder sind zusammen recht groß. Lade sie deshalb in ' + parts.length + ' Teilen herunter, einen nach dem anderen:</p><div class="parts"></div>';
+    parts.forEach(function (p, k) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn ghost small';
+      var bytes = p.reduce(function (s, i) { return s + (S.m.images[i].size || 0); }, 0);
+      b.textContent = 'Teil ' + (k + 1) + ' · ' + p.length + ' Bilder · ' + G.fmtBytes(bytes);
+      b.onclick = function () { zipPart(p, base + '-teil-' + (k + 1) + '.zip', b); };
+      box.querySelector('.parts').appendChild(b);
+    });
+  }
+  async function zipPart(idx, name, btn) {
+    if (busy) return; busy = true;
+    var box = $('dlbox'), st = document.createElement('div');
+    st.innerHTML = '<p class="hint"></p><div class="prog"><i></i></div>';
+    box.appendChild(st);
+    var txt = st.querySelector('p'), bar = st.querySelector('i');
+    var zip = new G.Zip(), used = {}, done = 0, total = idx.reduce(function (s, i) { return s + (S.m.images[i].size || 0); }, 0), got = 0;
+    function tick() { txt.textContent = 'Bilder werden vorbereitet: ' + done + ' von ' + idx.length; bar.style.width = (total ? got / total * 100 : done / idx.length * 100) + '%'; }
+    tick();
+    try {
+      var results = new Array(idx.length), next = 0;
+      async function worker() {
+        while (next < idx.length) {
+          var k = next++, i = idx[k];
+          results[k] = await fetchDec('o', S.m.images[i].n);
+          done++; got += S.m.images[i].size || 0; tick();
+        }
+      }
+      await Promise.all([worker(), worker(), worker()]);
+      results.forEach(function (buf, k) {
+        var nm = S.m.images[idx[k]].name || ('bild-' + (idx[k] + 1) + '.jpg');
+        var lk = nm.toLowerCase(), c = used[lk] || 0; used[lk] = c + 1;
+        if (c) { var dot = nm.lastIndexOf('.'); nm = (dot > 0 ? nm.slice(0, dot) : nm) + '-' + (c + 1) + (dot > 0 ? nm.slice(dot) : ''); }
+        zip.add(nm, buf);
+      });
+      txt.textContent = 'Fertig – der Download startet.';
+      save(zip.blob(), name);
+      if (btn) { btn.disabled = true; btn.textContent = '✓ ' + btn.textContent; }
+      setTimeout(function () { st.remove(); }, 4000);
+    } catch (e) {
+      txt.textContent = 'Download fehlgeschlagen. Bitte versuch es noch einmal.'; txt.className = 'err';
+    }
+    busy = false;
+  }
+
+  // ---------- Großansicht ----------
+  var lb = $('lb'), lbImg = $('lbImg'), lastFocus = null;
+  async function openLb(i) {
+    if (!lb.classList.contains('open')) { lastFocus = document.activeElement; lb.classList.add('open'); document.body.style.overflow = 'hidden'; $('lbX').focus(); }
+    S.cur = i;
+    var it = S.m.images[i];
+    $('lbPos').textContent = (i + 1) + ' / ' + S.m.images.length;
+    $('lbName').textContent = it.name || '';
+    $('lbDl').textContent = 'Herunterladen' + (it.size ? ' · ' + G.fmtBytes(it.size) : '');
+    lbImg.alt = 'Bild ' + (i + 1);
+    var th = S.thumbs[i];
+    if (th) th.then(function (u) { if (S.cur === i && !lbImg.dataset.hi) lbImg.src = u; });
+    lbImg.dataset.hi = '';
+    $('lbWait').hidden = false;
+    try {
+      var u = await getImg('p', i);
+      if (S.cur === i) { lbImg.src = u; lbImg.dataset.hi = '1'; }
+    } catch (e) {}
+    if (S.cur === i) $('lbWait').hidden = true;
+    [i + 1, i - 1].forEach(function (j) { if (j >= 0 && j < S.m.images.length) getImg('p', j).catch(function () {}); });
+  }
+  function closeLb() { lb.classList.remove('open'); document.body.style.overflow = ''; lbImg.removeAttribute('src'); S.cur = -1; if (lastFocus) lastFocus.focus(); }
+  function step(d) { var n = S.m.images.length; openLb((S.cur + d + n) % n); }
+  $('lbX').onclick = closeLb; $('lbP').onclick = function () { step(-1); }; $('lbN').onclick = function () { step(1); };
+  $('lbDl').onclick = function () { download([S.cur], ''); };
+  lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLb(); else if (e.key === 'ArrowLeft') step(-1); else if (e.key === 'ArrowRight') step(1);
+  });
+  var tx = null, ty = null;
+  lb.addEventListener('touchstart', function (e) { if (e.touches.length === 1) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; } }, { passive: true });
+  lb.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) closeLb();
+  });
+
+  // ---------- Start: Passwort aus Link (#k=…) oder aus dieser Sitzung ----------
+  var hk = new URLSearchParams(location.hash.slice(1)).get('k');
+  if (hk) { history.replaceState(null, '', location.pathname); $('pw').value = hk; unlock(hk); }
+  else { try { var sp = sessionStorage.getItem('galerie-pw'); if (sp) { $('pw').value = sp; unlock(sp); } } catch (_) {} }
+  if (!window.crypto || !crypto.subtle) $('err').textContent = 'Dein Browser ist zu alt für diese Galerie. Bitte öffne sie in einem aktuellen Browser.';
+})();
+</script>
+</body>
+</html>
