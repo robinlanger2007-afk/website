@@ -15,7 +15,7 @@ Portfolio-Seite von Robin Langer, Fotograf in Leipzig. Eine einzige Seite aus re
 | `CNAME` | Domain für GitHub Pages (`www.langer-photo.de`) |
 | `galerie/` | Kundengalerie (eigenes Projekt von Robin, hat mit dem Rest nichts zu tun) |
 | `tools/add_photos.py` | neue Fotos hinzufügen |
-| `tools/formular-empfang.gs` | Google-Skript, das Anfragen aus dem Formular in Robins Postfach schickt |
+| `tools/formular-empfang.gs` | Google-Skript, das Anfragen aus dem Formular in Robins Postfach legt |
 
 ## Neue Fotos hinzufügen
 
@@ -40,9 +40,21 @@ Kategorien sind `geburtstag`, `club` und `c1792272530021` (Portraits). Pro Kateg
 
 ## Anfrage-Formular
 
-Der Besucher wählt Tag, Art, Dauer und so weiter. Die Seite baut daraus eine fertige Nachricht in seiner Sprache. Aktuell schickt die Seite nichts selbst ab: Der Besucher wählt E-Mail-Programm, Gmail, Kopieren oder Instagram (`ig.me/m/antifazkee`).
+Der Besucher wählt Tag, Art, Dauer und so weiter, die Seite baut daraus eine fertige Nachricht. Wie sie bei Robin ankommt, steuert die Zeile `var ENDPOINT='';` am Anfang des Formular-Skripts in `index.html`:
 
-Für direktes Senden liegt `tools/formular-empfang.gs` bereit (Google Apps Script, schickt die Anfrage per E-Mail an Robins Gmail). Dafür muss Robin das Skript einmal bei Google bereitstellen und die Adresse an Claude geben. Die Seite ist dafür vorbereitet, im Datenschutztext muss dann der Absatz „Anfrageformular und Kontakt“ angepasst werden.
+- **`ENDPOINT` gesetzt (Normalfall):** Der Knopf „Anfrage abschicken“ sendet die Anfrage an ein kleines Google-Skript (`tools/formular-empfang.gs`), das sie als E-Mail in Robins Gmail-Postfach legt. Die Mail ist auf Deutsch, auch wenn der Besucher die Seite auf Englisch nutzt, und hat bei einer E-Mail-Adresse als Kontakt automatisch „Antworten“ an den Besucher. Klappt das Senden nicht (offline, Google-Fehler), zeigt die Seite die Ausweichwege E-Mail-Programm, Gmail, Kopieren und Instagram. Ein verstecktes Feld (`website`) fängt einfache Spam-Bots, das Skript begrenzt auf 20 Anfragen pro Stunde. Kontakt ist dann Pflichtfeld, sonst könnte Robin nicht antworten.
+- **`ENDPOINT` leer:** Die Seite verschickt nichts selbst. Der Besucher wählt E-Mail-Programm, Gmail, Kopieren oder Instagram (`ig.me/m/antifazkee`). Dann passt aber der Datenschutztext nicht mehr (Abschnitt 5 und 2 sagen, dass über einen Google-Dienst gesendet wird).
+
+### Einmal einrichten
+
+1. Im Google-Konto von Robin (robin.langer2007@gmail.com) https://script.google.com öffnen, „Neues Projekt“.
+2. Den Inhalt von `tools/formular-empfang.gs` einfügen (vorhandenen Beispielcode vorher löschen), speichern, Projekt „langer-photo Anfragen“ nennen.
+3. „Bereitstellen“ > „Neue Bereitstellung“ > Zahnrad > „Web-App“. Einstellungen: **Ausführen als: Ich**, **Zugriff: Jeder**. „Bereitstellen“.
+4. Google fragt nach Zugriff: „Zugriff autorisieren“, Konto wählen, bei der Warnung „Google hat diese App nicht überprüft“ auf „Erweitert“ und „Zu … (unsicher)“ gehen, „Zulassen“. Die App darf nur E-Mails senden.
+5. Die „Web-App-URL“ kopieren (`https://script.google.com/macros/s/…/exec`) und als `ENDPOINT` eintragen. Zum Prüfen die Adresse im Browser öffnen: Es muss `{"result":"ok", …}` erscheinen.
+6. Ein Testformular auf der Live-Seite abschicken. Die Mail muss im Postfach ankommen (auch im Spam-Ordner nachsehen).
+
+Nach einer Änderung am Skript: „Bereitstellen“ > „Bereitstellungen verwalten“ > Stift > Version „Neue Version“ > „Bereitstellen“. Eine **neue Bereitstellung** erzeugt eine neue Adresse, die dann wieder als `ENDPOINT` eingetragen werden muss.
 
 ## Prüfen vor dem Veröffentlichen
 
