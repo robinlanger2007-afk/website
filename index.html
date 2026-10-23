@@ -390,7 +390,7 @@ function init(){
 var form=document.getElementById('reqForm');if(!form)return;
 /* Adresse des Empfangs-Skripts (Google Apps Script, siehe tools/formular-empfang.gs und README).
    Leer: Die Seite verschickt nichts selbst, es bleibt der Weg über E-Mail, Gmail, Kopieren oder Instagram. */
-var ENDPOINT='';
+var ENDPOINT='https://script.google.com/macros/s/AKfycby9iIT02pjUNyL0SwrruO926zyBHVV3nlRZ9ncjd_5fnmp1PUOTw2r0G4FhHqDYt7U-xw/exec';
 var $=function(i){return document.getElementById(i)};
 var MON=function(){return I18N.t('cal.mon').split(',')},WD=function(){return I18N.t('cal.wd').split(',')};
 var today=new Date();today.setHours(0,0,0,0);
