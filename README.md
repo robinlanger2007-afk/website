@@ -2,7 +2,7 @@
 
 Portfolio-Seite von Robin Langer, Fotograf in Leipzig. Eine einzige Seite aus reinem HTML, CSS und JavaScript, ohne Build-Schritt, ohne Cookies, ohne Tracking.
 
-**Es gibt nur diese eine Version.** Alles, was Besucher sehen, kommt aus diesem Repository (Branch `main`) und wird über GitHub Pages unter https://www.langer-photo.de ausgeliefert. Ein Push auf `main` ist nach ein bis drei Minuten live. Der frühere Link auf claude.ai leitet nur noch hierher weiter und wird nicht mehr gepflegt.
+**Es gibt nur diese eine Version.** Alles, was Besucher sehen, kommt aus diesem Repository (Branch `main`) und wird über GitHub Pages unter https://www.langer-photo.de ausgeliefert. Ein Push auf `main` ist nach ein bis drei Minuten live. Der frühere Link auf claude.ai zeigt nur noch einen Hinweis mit Knopf zu dieser Seite (eine automatische Weiterleitung blockiert Claude dort) und wird nicht mehr gepflegt. Links in Instagram, TikTok und anderswo besser direkt auf https://www.langer-photo.de setzen.
 
 ## Dateien
 
