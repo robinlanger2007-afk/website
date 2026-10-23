@@ -13,6 +13,7 @@ Portfolio-Seite von Robin Langer, Fotograf in Leipzig. Eine einzige Seite aus re
 | `og.jpg` | Bild für Link-Vorschauen (WhatsApp, Instagram, Google) |
 | `sitemap.xml`, `robots.txt` | für Suchmaschinen |
 | `CNAME` | Domain für GitHub Pages (`www.langer-photo.de`) |
+| `googlefbd1f1a1989dd713.html` | Bestätigung für die Google Search Console. Nicht löschen, sonst verliert die Property die Bestätigung |
 | `galerie/` | Kundengalerie (eigenes Projekt von Robin, hat mit dem Rest nichts zu tun) |
 | `tools/add_photos.py` | neue Fotos hinzufügen |
 | `tools/formular-empfang.gs` | Google-Skript, das Anfragen aus dem Formular in Robins Postfach legt |
