@@ -19,6 +19,22 @@
 .pwrow input{font-size:1.15rem;padding:.95rem 5.5rem .95rem 1rem;letter-spacing:.04em}
 .pwrow button{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--mute);font:600 .9rem Manrope,sans-serif;padding:.6rem .8rem;cursor:pointer;min-height:44px}
 .pwform .btn{justify-self:start;padding:.9rem 1.8rem;font-size:1.05rem}
+.ghero{position:relative;overflow:hidden}
+.ghero .gin{position:relative;z-index:2}
+.ghero .slides{position:absolute;inset:0;background:var(--card)}
+.ghero .slides img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.02);transition:opacity 1.6s ease,transform 0s 1.6s}
+.ghero .slides img.on{opacity:1;transform:scale(1.12);transition:opacity 1.6s ease,transform 9s linear}
+.ghero:not(.has) .slides{display:none}
+.ghero.has{display:flex;align-items:flex-end;min-height:clamp(26rem,72svh,46rem);color:#f3eee6;--mute:#d8d2de}
+.ghero.has::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to top,rgba(8,7,12,.9) 0%,rgba(8,7,12,.3) 55%,rgba(8,7,12,.5) 100%)}
+.ghero.has .gin{width:100%}
+.ghero.has .ghead{padding-top:clamp(4rem,14vw,8rem)}
+.ghero.has .until{background:rgba(8,7,12,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ghero.has .btn.ghost{color:#f3eee6;background:rgba(8,7,12,.4);border-color:rgba(243,238,230,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ghero.has .btn.ghost:hover{border-color:var(--accent)}
+.ghero.has .hint{color:#d8d2de}
+.ghero.has+.gbody{padding-top:clamp(1rem,2.5vw,1.8rem)}
+@media (prefers-reduced-motion:reduce){.ghero .slides img,.ghero .slides img.on{transition:none;transform:none}}
 .ghead{padding:clamp(1.5rem,5vw,3.5rem) 0 clamp(1.5rem,4vw,2.5rem)}
 .ghead h1{font-size:clamp(2.6rem,10vw,6.5rem);overflow-wrap:anywhere}
 .gmeta{margin:1.1rem 0 0;color:var(--mute);font-size:1.02rem}
@@ -86,20 +102,25 @@
 </main>
 
 <main id="gal" hidden>
-  <div class="wrap">
-    <section class="ghead">
-      <p class="eyebrow">Kundengalerie</p>
-      <h1 id="gt"></h1>
-      <p class="gmeta" id="gmeta"></p>
-      <p class="gnote" id="gnote" hidden></p>
-      <p class="until" id="until" hidden></p>
-      <div class="actions">
-        <button class="btn" id="dlAll" type="button">Alle herunterladen</button>
-        <button class="btn ghost" id="selMode" type="button" aria-pressed="false">Bilder auswählen</button>
-        <button class="btn ghost" id="logout" type="button">Abmelden</button>
+  <section class="ghero" id="ghero">
+    <div class="slides" id="gslides" aria-hidden="true"></div>
+    <div class="wrap gin">
+      <div class="ghead">
+        <p class="eyebrow">Kundengalerie</p>
+        <h1 id="gt"></h1>
+        <p class="gmeta" id="gmeta"></p>
+        <p class="gnote" id="gnote" hidden></p>
+        <p class="until" id="until" hidden></p>
+        <div class="actions">
+          <button class="btn" id="dlAll" type="button">Alle herunterladen</button>
+          <button class="btn ghost" id="selMode" type="button" aria-pressed="false">Bilder auswählen</button>
+          <button class="btn ghost" id="logout" type="button">Abmelden</button>
+        </div>
+        <div class="dlbox" id="dlbox" aria-live="polite"></div>
       </div>
-      <div class="dlbox" id="dlbox" aria-live="polite"></div>
-    </section>
+    </div>
+  </section>
+  <div class="wrap gbody">
     <div class="grid" id="grid"></div>
     <p class="empty" id="empty" hidden>In dieser Galerie sind noch keine Bilder.</p>
   </div>
@@ -188,6 +209,7 @@
     });
     $('lock').hidden = true; $('gal').hidden = false;
     window.scrollTo(0, 0);
+    startHero();
   }
 
   $('grid').addEventListener('click', function (e) {
@@ -228,6 +250,75 @@
       while (S.prevOrder.length > 12) { var old = S.prevOrder.shift(); var u = S.prev[old]; delete S.prev[old]; u.then(URL.revokeObjectURL); }
     }
     try { return await p; } catch (e) { delete cache[i]; throw e; }
+  }
+
+  // ---------- Hintergrund: wechselnde Bilder aus der Galerie ----------
+  var H = null, HERO_N = 6, HERO_MS = 6500;
+  var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Passende Bilder wählen: bei vielen Fotos die, deren Format am besten zum Kopfbereich passt, gleichmäßig verteilt
+  function pickHero(imgs, ratio) {
+    var n = imgs.length, all = imgs.map(function (_, i) { return i; });
+    if (n <= HERO_N) return all;
+    function dist(i) { return Math.abs(Math.log(((imgs[i].w || 3) / (imgs[i].h || 2)) / ratio)); }
+    var pool = all.slice().sort(function (a, b) { return dist(a) - dist(b); })
+      .slice(0, Math.max(HERO_N, Math.ceil(n / 2))).sort(function (a, b) { return a - b; });
+    var out = [];
+    for (var k = 0; k < HERO_N; k++) out.push(pool[Math.floor((k + .5) * pool.length / HERO_N)]);
+    return out;
+  }
+  function startHero() {
+    var hero = $('ghero'), box = $('gslides'), imgs = (S.m && S.m.images) || [];
+    if (H && H.timer) clearTimeout(H.timer);
+    box.innerHTML = ''; H = null;
+    if (!imgs.length) { hero.classList.remove('has'); return; }
+    hero.classList.add('has');
+    var pick = pickHero(imgs, hero.clientWidth / Math.max(hero.clientHeight, 1));
+    var h = H = { pick: pick, st: [], cur: -1, vis: true, timer: null, slides: pick.map(function () {
+      var e = document.createElement('img'); e.alt = ''; e.decoding = 'async'; box.appendChild(e); return e;
+    }) };
+    function alive() { return h === H; }
+    function giveUp() {      // alle Bilder fehlgeschlagen: normaler Kopf ohne Hintergrund
+      if (!alive()) return;
+      for (var k = 0; k < pick.length; k++) if (h.st[k] !== 3) return;
+      hero.classList.remove('has');
+    }
+    function show(k) {
+      h.cur = k;
+      setTimeout(function () { if (alive()) h.slides[k].classList.add('on'); }, 60);
+      if (pick.length > 1 && !REDUCED) {
+        setTimeout(function () { if (alive()) load((k + 1) % pick.length); }, 2500);
+        h.timer = setTimeout(tick, HERO_MS);
+      }
+    }
+    function load(k) {
+      if (!alive() || h.st[k]) return;
+      h.st[k] = 1;
+      fetchDec('p', S.m.images[pick[k]].n).then(function (buf) {
+        if (!alive()) return;
+        var e = h.slides[k];
+        e.onload = function () { h.st[k] = 2; if (alive() && h.cur < 0) show(k); };
+        e.onerror = function () { h.st[k] = 3; giveUp(); if (alive() && h.cur < 0) next0(); };
+        e.src = URL.createObjectURL(new Blob([buf], { type: 'image/jpeg' }));
+      }).catch(function () { h.st[k] = 3; giveUp(); if (alive() && h.cur < 0) next0(); });
+    }
+    function next0() {       // erstes Bild ging nicht: das nächste probieren
+      for (var k = 0; k < pick.length; k++) if (!h.st[k]) { load(k); return; }
+    }
+    function tick() {
+      if (!alive()) return;
+      h.timer = setTimeout(tick, HERO_MS);
+      if (document.hidden || !h.vis) return;
+      var n = pick.length, t = h.cur;
+      for (var j = 1; j < n; j++) { var m = (h.cur + j) % n; if (h.st[m] !== 3) { t = m; break; } }
+      if (t === h.cur) return;
+      if (h.st[t] !== 2) { load(t); return; }
+      h.slides[h.cur].classList.remove('on'); h.cur = t; h.slides[t].classList.add('on');
+      load((t + 1) % n);
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (ents) { if (alive()) h.vis = ents[ents.length - 1].isIntersecting; }).observe(hero);
+    }
+    load(0);
   }
 
   // ---------- Auswahl ----------
