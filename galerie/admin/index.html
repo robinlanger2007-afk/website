@@ -278,9 +278,11 @@ details.help .btn{margin:.4rem 0}
   }
   async function toJpeg(bmp, max, q) {
     var W = bmp.width, H = bmp.height, s = Math.min(1, max / Math.max(W, H));
+    var tw = Math.max(1, Math.round(W * s)), th = Math.max(1, Math.round(H * s));
     var src = bmp, cw = W, ch = H;
-    while (cw * s < cw / 2 - 1) { cw = Math.round(cw / 2); ch = Math.round(ch / 2); src = draw(src, cw, ch); } // schrittweise verkleinern = schärfer
-    var c = draw(src, Math.max(1, Math.round(W * s)), Math.max(1, Math.round(H * s)));
+    // schrittweise halbieren, solange die Hälfte noch nicht kleiner als das Ziel ist = schärfer
+    while (cw / 2 >= tw && ch / 2 >= th) { cw = Math.round(cw / 2); ch = Math.round(ch / 2); src = draw(src, cw, ch); }
+    var c = draw(src, tw, th);
     return new Promise(function (res, rej) {
       c.toBlob(function (b) { c.width = c.height = 0; b ? res(b) : rej(new Error('Bild konnte nicht umgewandelt werden')); }, 'image/jpeg', q);
     });
