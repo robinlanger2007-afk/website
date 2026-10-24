@@ -17,6 +17,8 @@ Portfolio-Seite von Robin Langer, Fotograf in Leipzig. Eine einzige Seite aus re
 | `galerie/` | Kundengalerie (eigenes Projekt von Robin, hat mit dem Rest nichts zu tun) |
 | `tools/add_photos.py` | neue Fotos hinzufügen |
 | `tools/formular-empfang.gs` | Google-Skript, das Anfragen aus dem Formular in Robins Postfach legt |
+| `404.html` | Eigene „Seite nicht gefunden“-Seite (GitHub Pages liefert sie automatisch) |
+| `apple-touch-icon.png`, `favicon.ico` | Symbol für den iPhone-Homescreen und Browser-Tab (dunkel mit „RL“) |
 
 ## Neue Fotos hinzufügen
 
@@ -43,7 +45,7 @@ Kategorien sind `geburtstag`, `club` und `c1792272530021` (Portraits). Pro Kateg
 
 Der Besucher wählt Tag, Art, Dauer und so weiter, die Seite baut daraus eine fertige Nachricht. Wie sie bei Robin ankommt, steuert die Zeile `var ENDPOINT='';` am Anfang des Formular-Skripts in `index.html`:
 
-- **`ENDPOINT` gesetzt (Normalfall):** Der Knopf „Anfrage abschicken“ sendet die Anfrage an ein kleines Google-Skript (`tools/formular-empfang.gs`), das sie als E-Mail in Robins Gmail-Postfach legt. Die Mail ist auf Deutsch, auch wenn der Besucher die Seite auf Englisch nutzt, und hat bei einer E-Mail-Adresse als Kontakt automatisch „Antworten“ an den Besucher. Klappt das Senden nicht (offline, Google-Fehler), zeigt die Seite die Ausweichwege E-Mail-Programm, Gmail, Kopieren und Instagram. Ein verstecktes Feld (`website`) fängt einfache Spam-Bots, das Skript begrenzt auf 20 Anfragen pro Stunde. Kontakt ist dann Pflichtfeld, sonst könnte Robin nicht antworten.
+- **`ENDPOINT` gesetzt (Normalfall):** Der Knopf „Anfrage abschicken“ sendet die Anfrage an ein kleines Google-Skript (`tools/formular-empfang.gs`), das sie als E-Mail in Robins Gmail-Postfach legt. Die Mail ist auf Deutsch, auch wenn der Besucher die Seite auf Englisch nutzt, und hat bei einer E-Mail-Adresse als Kontakt automatisch „Antworten“ an den Besucher. Klappt das Senden nicht (offline, Google-Fehler), zeigt die Seite die Ausweichwege E-Mail-Programm, Gmail, Kopieren und Instagram. Ein verstecktes Feld (`website`) fängt einfache Spam-Bots, das Skript begrenzt auf 20 Anfragen pro Stunde. Kontakt ist dann Pflichtfeld, sonst könnte Robin nicht antworten. Gibt der Besucher eine E-Mail-Adresse an, schickt das Skript ihm zusätzlich eine kurze Bestätigung (fester Text, zweisprachig, nichts aus der Anfrage; pro Adresse höchstens alle 6 Stunden, abschaltbar mit `BESTAETIGUNG = false` im Skript). Das steht auch in der Datenschutzerklärung.
 - **`ENDPOINT` leer:** Die Seite verschickt nichts selbst. Der Besucher wählt E-Mail-Programm, Gmail, Kopieren oder Instagram (`ig.me/m/antifazkee`). Dann passt aber der Datenschutztext nicht mehr (Abschnitt 5 und 2 sagen, dass über einen Google-Dienst gesendet wird).
 
 ### Einmal einrichten
