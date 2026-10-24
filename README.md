@@ -39,6 +39,7 @@ Kategorien sind `geburtstag`, `club` und `c1792272530021` (Portraits). Pro Kateg
 - Sprüche, Beschriftungen, Fehlermeldungen: im Skript `i18n-js` in `index.html`, Wörterbuch `UI`. Pro Eintrag Deutsch und Englisch.
 - Untertitel und „Über mich“: im Block `pdata` (`texts`).
 - Impressum und Datenschutz: als HTML im Dialog `dlg-impressum` / `dlg-datenschutz`. Die englische Fassung steht in den Listen `IMP` und `DSG` im selben Skript und **muss genauso viele Absätze haben wie die deutsche**, sonst bleibt die englische Ansicht deutsch.
+- **Datenschutztext mitpflegen:** Sobald die Seite etwas Neues speichert (Local Storage, Cookies) oder einen fremden Server anspricht (Schrift, Karte, Video, Statistik, Einbettung), muss der Datenschutztext in beiden Sprachen angepasst werden. Neue oder geänderte Stellen stehen in `DSG` für Spanisch und Französisch zunächst auf Englisch.
 - Sprachen: nur Deutsch und Englisch sind im Angebot (`OFFER`). Spanisch und Französisch sind im Code vorbereitet, aber nicht freigeschaltet.
 
 ## Anfrage-Formular
