@@ -25,7 +25,9 @@ function sameKey(a, b) {
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
-    const path = decodeURIComponent(url.pathname.replace(/^\/+/, ''));
+    let path;
+    try { path = decodeURIComponent(url.pathname.replace(/^\/+/, '')); }
+    catch (_) { return json({ error: 'Ungültige Adresse' }, 400); }
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
 
     // Öffentlich: verschlüsselte Dateien lesen

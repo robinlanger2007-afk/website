@@ -125,7 +125,7 @@ details.help .btn{margin:.4rem 0}
       <div id="progBox" hidden>
         <p class="hint" id="progTxt" style="margin-bottom:.5rem"></p>
         <div class="prog"><i id="progBar"></i></div>
-        <p class="hint" style="margin-top:.5rem">Bitte lass diese Seite geöffnet, bis der Upload fertig ist.</p>
+        <p class="hint" id="progKeep" style="margin-top:.5rem">Bitte lass diese Seite geöffnet, bis der Upload fertig ist.</p>
         <ul class="log" id="log"></ul>
       </div>
       <div id="doneBox" hidden></div>
@@ -299,7 +299,7 @@ details.help .btn{margin:.4rem 0}
     if (!title) { $('fTitle').focus(); toast('Bitte gib einen Titel ein'); return; }
     if (!mode && pw.length < 10 && !confirm('Das Passwort ist kurz und damit leichter zu erraten. Trotzdem verwenden?')) return;
     var full = $('fFull').checked;
-    uploading = true; this.disabled = true; $('doneBox').hidden = true; $('progBox').hidden = false; $('log').innerHTML = '';
+    uploading = true; this.disabled = true; $('doneBox').hidden = true; $('progBox').hidden = false; $('progKeep').hidden = false; $('log').innerHTML = '';
     $('form').querySelectorAll('input,textarea,button:not(#start)').forEach(function (el) { el.disabled = true; });
     var wake = null; try { wake = await navigator.wakeLock.request('screen'); } catch (_) {}
     var txt = $('progTxt'), bar = $('progBar');
@@ -379,6 +379,7 @@ details.help .btn{margin:.4rem 0}
   function showDone(pw, m, n, failed) {
     var g = { pw: pw, title: m.title, until: m.until };
     var box = $('doneBox'); box.hidden = false; $('progBox').hidden = !failed;
+    $('progTxt').textContent = failed ? 'Fertig. Diese Dateien wurden übersprungen:' : ''; $('progKeep').hidden = true;
     box.innerHTML = '<div class="done"><h3 style="margin:0;font-size:1.4rem"></h3><p class="hint">Die Galerie ist ab sofort online.</p><pre></pre><div class="row" style="flex-wrap:wrap"><button class="btn small" type="button" data-a="copy">Nachricht kopieren</button><button class="btn small ghost" type="button" data-a="share" hidden>Teilen …</button></div></div>';
     box.querySelector('h3').textContent = '✓ ' + n + (n === 1 ? ' Bild' : ' Bilder') + ' hochgeladen' + (failed ? ' (' + failed + ' übersprungen)' : '');
     box.querySelector('pre').textContent = message(g);

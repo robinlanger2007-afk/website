@@ -165,18 +165,31 @@
   };
   $('pwform').onsubmit = function (e) { e.preventDefault(); unlock($('pw').value); };
 
+  function pwVariants(pw) {
+    var a = pw.trim(), out = [a], up = a.toUpperCase(), raw = up.replace(/[\s-]+/g, '');
+    if (up !== a) out.push(up);
+    if (/^[A-HJ-NP-Z2-9]{12}$/.test(raw)) { var f = raw.slice(0, 4) + '-' + raw.slice(4, 8) + '-' + raw.slice(8); if (out.indexOf(f) < 0) out.push(f); }
+    return out;
+  }
   async function unlock(pw) {
     if (!pw.trim()) return;
     if (!STORE) { $('err').textContent = 'Die Galerie wird gerade eingerichtet. Bitte versuch es später noch einmal.'; return; }
     var go = $('go'); go.disabled = true; go.innerHTML = '<span class="spin"></span> Wird geöffnet…'; $('err').textContent = '';
     try {
-      var d = await G.derive(pw);
-      var r = await fetch(BASE + d.id + '/m.bin', { cache: 'no-store' });
+      var d, r, used;
+      // Erst genau wie eingegeben, dann Großschreibung und die Form XXXX-XXXX-XXXX probieren
+      // (erzeugte Passwörter sind groß geschrieben; am Handy wird oft klein oder ohne Striche getippt)
+      var tries = pwVariants(pw);
+      for (var i = 0; i < tries.length; i++) {
+        d = await G.derive(tries[i]);
+        r = await fetch(BASE + d.id + '/m.bin', { cache: 'no-store' });
+        if (r.status !== 404) { used = tries[i]; break; }
+      }
       if (r.status === 404) throw new Error('Zu diesem Passwort gibt es keine Galerie. Bitte prüfe die Schreibweise.');
       if (!r.ok) throw new Error('Die Galerie konnte gerade nicht geladen werden. Bitte versuch es gleich noch einmal.');
       var m = JSON.parse(new TextDecoder().decode(await G.decrypt(d.key, await r.arrayBuffer())));
       S.key = d.key; S.id = d.id; S.m = m;
-      try { sessionStorage.setItem('galerie-pw', pw); } catch (_) {}
+      try { sessionStorage.setItem('galerie-pw', used); } catch (_) {}
       render();
     } catch (err) {
       $('err').textContent = err.name === 'OperationError' ? 'Das Passwort passt nicht.' : err.message;
@@ -467,9 +480,20 @@
   });
 
   // ---------- Start: Passwort aus Link (#k=…) oder aus dieser Sitzung ----------
-  var hk = new URLSearchParams(location.hash.slice(1)).get('k');
-  if (hk) { history.replaceState(null, '', location.pathname); $('pw').value = hk; unlock(hk); }
-  else { try { var sp = sessionStorage.getItem('galerie-pw'); if (sp) { $('pw').value = sp; unlock(sp); } } catch (_) {} }
+  function fromHash() {
+    var hk = new URLSearchParams(location.hash.slice(1)).get('k');
+    if (!hk) return false;
+    history.replaceState(null, '', location.pathname); $('pw').value = hk; unlock(hk);
+    return true;
+  }
+  // Link mit #k=… wird in einem schon geöffneten Tab eingefügt: Adresse ändert sich nur hinter dem #, die Seite lädt nicht neu
+  window.addEventListener('hashchange', function () {
+    var hk = new URLSearchParams(location.hash.slice(1)).get('k');
+    if (!hk) return;
+    if (S.m) { try { sessionStorage.setItem('galerie-pw', hk); } catch (_) {} history.replaceState(null, '', location.pathname); location.reload(); }
+    else fromHash();
+  });
+  if (!fromHash()) { try { var sp = sessionStorage.getItem('galerie-pw'); if (sp) { $('pw').value = sp; unlock(sp); } } catch (_) {} }
   if (!window.crypto || !crypto.subtle) $('err').textContent = 'Dein Browser ist zu alt für diese Galerie. Bitte öffne sie in einem aktuellen Browser.';
 })();
 </script>
