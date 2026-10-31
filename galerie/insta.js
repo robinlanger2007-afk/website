@@ -132,9 +132,11 @@
     });
     if (s.cover) {
       var txt = (st.text || '').toUpperCase(), y = H - 72;
-      if (txt && st.credit) { spaced(ctx, txt, 48, y, 22, 'left', th.ink); spaced(ctx, CREDIT, W - 48, y, 17, 'right', th.ink); }
-      else if (txt) spaced(ctx, txt, W / 2, y, 24, 'center', th.ink);
-      else if (st.credit) spaced(ctx, CREDIT, W / 2, y, 18, 'center', th.ink);
+      if (txt) { spaced(ctx, txt, 48, y, 22, 'left', th.ink); spaced(ctx, CREDIT, W - 48, y, 17, 'right', th.ink); }
+      else spaced(ctx, CREDIT, W / 2, y, 18, 'center', th.ink);
+    } else {
+      // auf jeder weiteren Slide klein im unteren Rand (dort liegt nie ein Bild)
+      ctx.globalAlpha = 0.6; spaced(ctx, CREDIT, W / 2, H - 23, 13, 'center', th.ink); ctx.globalAlpha = 1;
     }
     return c;
   }
@@ -150,7 +152,6 @@
         '<p class="hint ig-info"></p>' +
         '<div class="ig-lab">Cover <span class="hint">(antippen zum Wechseln)</span></div><div class="ig-covers"></div>' +
         '<label class="ig-field">Text auf dem Cover<input class="ig-text" maxlength="40" placeholder="z. B. Halloween Night"></label>' +
-        '<label class="check ig-cred"><input type="checkbox" class="ig-credit" checked><span>Fotograf auf dem Cover nennen <span class="hint">(langer-photo.de)</span></span></label>' +
         '<div class="ig-seg" role="group" aria-label="Hintergrund"><button type="button" data-t="light" aria-pressed="true">Hell</button><button type="button" data-t="dark" aria-pressed="false">Dunkel</button></div>' +
         '<div class="ig-acts"><button class="btn ghost ig-mix" type="button">Neu anordnen</button><button class="btn ig-save" type="button">Slides speichern</button></div>' +
         '<p class="hint ig-status" aria-live="polite"></p>' +
@@ -162,7 +163,6 @@
     q('.ig-mix').onclick = function () { st.seed = (st.seed * 7919 + 13) >>> 0; replan(); };
     var tt = null;
     q('.ig-text').oninput = function () { st.text = this.value.trim(); clearTimeout(tt); tt = setTimeout(replan, 250); };
-    q('.ig-credit').onchange = function () { st.credit = this.checked; replan(); };
     dlg.querySelectorAll('.ig-seg button').forEach(function (b) {
       b.onclick = function () {
         st.theme = b.dataset.t;
@@ -184,7 +184,7 @@
   function replan() {
     if (!st) return;
     var list = st.order.map(function (k) { var it = st.items[k]; return { k: k, r: it.r, L: it.r > 1.15 }; });
-    st.plan = plan(list, st.seed, !!(st.text || st.credit));
+    st.plan = plan(list, st.seed, true);
     var n = st.plan.slides.length, used = list.length - st.plan.dropped;
     dlg.querySelector('.ig-count').textContent = ' · ' + n + ' Slides · ' + used + (used === 1 ? ' Bild' : ' Bilder');
     var info = st.note || '';
@@ -293,12 +293,11 @@
     st = {
       items: ctx.images.map(function (it) { return { i: it.i, r: (it.w && it.h) ? it.w / it.h : 2 / 3 }; }),
       title: ctx.title, note: ctx.note, fetchP: ctx.fetchP, thumb: ctx.thumb, save: ctx.save, share: ctx.share,
-      canShare: ctx.canShare, slug: ctx.slug, seed: (Date.now() & 0xffff) + 1, theme: 'light', credit: true,
+      canShare: ctx.canShare, slug: ctx.slug, seed: (Date.now() & 0xffff) + 1, theme: 'light',
       text: '', srcs: [], failed: 0, alive: true, ready: false, plan: null
     };
     st.order = st.items.map(function (_, k) { return k; });
     dlg.querySelector('.ig-text').value = '';
-    dlg.querySelector('.ig-credit').checked = true;
     dlg.querySelectorAll('.ig-seg button').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.t === 'light'); });
     dlg.querySelector('.ig-status').textContent = '';
     dlg.hidden = false; document.body.style.overflow = 'hidden';

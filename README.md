@@ -25,7 +25,8 @@ Portfolio-Seite von Robin Langer, Fotograf in Leipzig. Eine einzige Seite aus re
 In jeder Kundengalerie gibt es den Knopf **Instagram-Post** (und in der Auswahlleiste **Insta-Post**). Daraus wird im Browser ein fertiges Carousel im Format 4:5 (1080 × 1350 px, höchstens 20 Slides): Cover, Einzelbilder, versetzte Paare, groß/klein, Panoramen über zwei Slides und gestapelte Querformate. Kein Bild wird beschnitten. Code: `galerie/insta.js`.
 
 - Reihenfolge: ausgewählte Bilder in der Reihenfolge, in der sie angetippt wurden, ohne Auswahl alle (höchstens 36). Das erste ist das Cover, es lässt sich im Dialog wechseln.
-- Einstellbar: Text auf dem Cover, Hinweis „FOTOS · LANGER-PHOTO.DE“, heller oder dunkler Hintergrund, „Neu anordnen“ für eine andere Aufteilung.
+- Auf jeder Slide steht klein „FOTOS · LANGER-PHOTO.DE“ (auf dem Cover etwas größer, auf den übrigen Slides dezent im unteren Rand). Das lässt sich nicht abschalten.
+- Einstellbar: Text auf dem Cover, heller oder dunkler Hintergrund, „Neu anordnen“ für eine andere Aufteilung.
 - Speichern: am Handy über das Teilen-Menü (iPhone: „Bilder sichern“ legt sie in Fotos), am Computer als ZIP mit durchnummerierten Slides.
 - Im Admin-Bereich öffnet **Instagram-Post** die Galerie direkt mit dem Dialog (Link mit `#k=…&ig=1`).
 - Es wird nichts hochgeladen oder an fremde Server geschickt, der Datenschutztext bleibt gleich.
