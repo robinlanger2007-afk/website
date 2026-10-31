@@ -42,6 +42,7 @@
 .until{display:inline-flex;align-items:center;gap:.55rem;margin-top:1.2rem;padding:.45rem .95rem;border:1px solid var(--accent);border-radius:1.4rem;font-weight:600;font-size:.9rem}
 .until::before{content:"";width:.5rem;height:.5rem;border-radius:50%;background:var(--accent)}
 .actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.8rem}
+.ziplink{margin:.5rem 0 0}.linkbtn{background:none;border:0;padding:.7rem 0;color:var(--mute);font:inherit;font-size:.88rem;text-decoration:underline;cursor:pointer}.linkbtn:hover,.linkbtn:focus-visible{color:var(--ink)}
 .dlbox{margin-top:1rem;display:grid;gap:.6rem;max-width:640px}
 .dlbox:empty{display:none}
 .parts{display:flex;flex-wrap:wrap;gap:.5rem}
@@ -116,6 +117,7 @@
           <button class="btn ghost" id="selMode" type="button" aria-pressed="false">Bilder auswählen</button>
           <button class="btn ghost" id="logout" type="button">Abmelden</button>
         </div>
+        <p class="ziplink"><button type="button" class="linkbtn" id="dlZip">Lieber alle Bilder als ZIP-Datei?</button></p>
         <div class="dlbox" id="dlbox" aria-live="polite"></div>
       </div>
     </div>
@@ -358,52 +360,189 @@
     S.sel.clear();
     if (S.selecting) $('selMode').click(); else updSel();
   };
-  $('dlSel').onclick = function () {
-    var idx = Array.from(S.sel).sort(function (a, b) { return a - b; });
-    download(idx, 'auswahl');
-  };
-  $('dlAll').onclick = function () { download(S.m.images.map(function (_, i) { return i; }), ''); };
-
   // ---------- Download ----------
+  // iPhone/iPad: Teilen-Menü ("Bilder sichern" legt sie direkt in Fotos ab). Sonst: Bilder einzeln als Dateien.
+  // Die ZIP-Datei bleibt als zweite Möglichkeit.
+  var IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var SHARE_LIMIT = 100e6, SHARE_MAX = 25;
+  var SHARE = (function () {
+    try { return !!(IOS && navigator.share && navigator.canShare && navigator.canShare({ files: [new File([new Blob(['x'])], 'a.jpg', { type: 'image/jpeg' })] })); }
+    catch (e) { return false; }
+  })();
   function save(blob, name) {
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = name; a.rel = 'noopener';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 120000);
   }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   async function original(i) {
     var it = S.m.images[i];
     return new Blob([await fetchDec('o', it.n)], { type: it.type || 'image/jpeg' });
   }
+  // Dateiname je Bild; doppelte Namen bekommen -2, -3 …, damit nichts überschrieben wird
+  function fileName(i, used) {
+    var nm = S.m.images[i].name || ('bild-' + (i + 1) + '.jpg');
+    var lk = nm.toLowerCase(), c = used[lk] || 0; used[lk] = c + 1;
+    if (c) { var dot = nm.lastIndexOf('.'); nm = (dot > 0 ? nm.slice(0, dot) : nm) + '-' + (c + 1) + (dot > 0 ? nm.slice(dot) : ''); }
+    return nm;
+  }
+  function splitParts(idx, limit, max) {
+    var parts = [], cur = [], sz = 0;
+    idx.forEach(function (i) {
+      var s = S.m.images[i].size || 0;
+      if (cur.length && (sz + s > limit || (max && cur.length >= max))) { parts.push(cur); cur = []; sz = 0; }
+      cur.push(i); sz += s;
+    });
+    if (cur.length) parts.push(cur);
+    return parts;
+  }
+  function partsUi(box, intro, parts, label, run) {
+    box.innerHTML = '<p class="hint"></p><div class="parts"></div>';
+    box.querySelector('p').textContent = intro;
+    parts.forEach(function (p, k) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn ghost small';
+      var bytes = p.reduce(function (s, i) { return s + (S.m.images[i].size || 0); }, 0);
+      b.textContent = 'Teil ' + (k + 1) + ' · ' + p.length + (p.length === 1 ? ' Bild' : ' Bilder') + ' · ' + G.fmtBytes(bytes);
+      b.onclick = function () { run(p, k, b); };
+      box.querySelector('.parts').appendChild(b);
+    });
+  }
+  function progressUi(box) {
+    var st = document.createElement('div');
+    st.innerHTML = '<p class="hint"></p><div class="prog"><i></i></div>';
+    box.appendChild(st);
+    var txt = st.querySelector('p'), bar = st.querySelector('i');
+    return { el: st, txt: txt, say: function (t, err) { txt.textContent = t; txt.className = err ? 'err' : 'hint'; }, pct: function (v) { bar.style.width = v + '%'; } };
+  }
   var busy = false;
+
   async function download(idx, suffix) {
     if (busy || !idx.length) return;
     var box = $('dlbox');
+    if (SHARE) return shareDownload(idx, box);
     if (idx.length === 1) {
       busy = true; box.innerHTML = '<p class="hint">Bild wird vorbereitet…</p>';
       try { save(await original(idx[0]), S.m.images[idx[0]].name); box.innerHTML = ''; }
       catch (e) { box.innerHTML = '<p class="err">Download fehlgeschlagen. Bitte versuch es noch einmal.</p>'; }
       busy = false; return;
     }
-    // In Teile aufteilen, damit der Browser nicht zu viel auf einmal im Speicher halten muss
-    var parts = [], cur = [], sz = 0;
-    idx.forEach(function (i) {
-      var s = S.m.images[i].size || 0;
-      if (cur.length && sz + s > PART_LIMIT) { parts.push(cur); cur = []; sz = 0; }
-      cur.push(i); sz += s;
-    });
-    if (cur.length) parts.push(cur);
+    return directDownload(idx, box);
+  }
+
+  // Mehrere Bilder als einzelne Dateien nacheinander
+  async function directDownload(idx, box) {
+    busy = true; box.innerHTML = '';
+    var pr = progressUi(box), used = {}, ok = 0, failed = 0;
+    var note = document.createElement('p'); note.className = 'hint';
+    note.textContent = 'Dein Browser fragt eventuell, ob diese Seite mehrere Dateien laden darf. Bitte erlaube das, sonst stoppt der Download.';
+    box.appendChild(note);
+    for (var k = 0; k < idx.length; k++) {
+      pr.say('Bild ' + (k + 1) + ' von ' + idx.length + ' wird geladen …'); pr.pct(k / idx.length * 100);
+      try { save(await original(idx[k]), fileName(idx[k], used)); ok++; } catch (e) { failed++; }
+      await sleep(400);
+    }
+    pr.pct(100); note.remove();
+    if (!ok) pr.say('Download fehlgeschlagen. Bitte versuch es noch einmal.', true);
+    else pr.say('Fertig. ' + ok + (ok === 1 ? ' Bild liegt' : ' Bilder liegen') + ' jetzt im Download-Ordner deines Geräts.' +
+      (failed ? ' ' + failed + ' konnten nicht geladen werden, bitte versuch sie noch einmal.' : '') +
+      ' Fehlen welche, hat dein Browser sie blockiert. Dann nimm bitte die ZIP-Datei.', failed > 0);
+    busy = false;
+  }
+
+  // iPhone/iPad: Teilen-Menü
+  async function trySharing(files) {
+    try {
+      if (navigator.canShare && !navigator.canShare({ files: files })) return 'unsupported';
+      await navigator.share({ files: files });
+      return 'ok';
+    } catch (e) {
+      var n = e && e.name;
+      return n === 'AbortError' ? 'cancel' : n === 'NotAllowedError' ? 'blocked' : 'error';
+    }
+  }
+  async function shareDownload(idx, box) {
+    var parts = splitParts(idx, SHARE_LIMIT, SHARE_MAX);
+    if (parts.length === 1) { box.innerHTML = ''; return sharePart(parts[0], null); }
+    partsUi(box, 'Damit dein Handy nicht überlastet wird, lade ich die Bilder in ' + parts.length + ' Teilen. Tippe jeweils auf „Bilder sichern“, dann landen sie in deiner Fotos-App:',
+      parts, 'Teil', function (p, k, b) { sharePart(p, b); });
+  }
+  async function sharePart(idx, btn) {
+    if (busy) return; busy = true;
+    var box = $('dlbox');
+    var pr = progressUi(box), used = {}, files = [], done = 0;
+    pr.say('Bilder werden vorbereitet: 0 von ' + idx.length);
+    try {
+      var results = new Array(idx.length), next = 0;
+      var worker = async function () {
+        while (next < idx.length) {
+          var k = next++, i = idx[k];
+          results[k] = await original(i);
+          done++; pr.say('Bilder werden vorbereitet: ' + done + ' von ' + idx.length); pr.pct(done / idx.length * 100);
+        }
+      };
+      await Promise.all([worker(), worker(), worker()]);
+      results.forEach(function (blob, k) { files.push(new File([blob], fileName(idx[k], used), { type: blob.type || 'image/jpeg' })); });
+    } catch (e) {
+      pr.say('Download fehlgeschlagen. Bitte versuch es noch einmal.', true); busy = false; return;
+    }
+    busy = false;
+    function finish() { pr.say('Fertig.'); if (btn) { btn.disabled = true; btn.textContent = '✓ ' + btn.textContent; } setTimeout(function () { pr.el.remove(); }, 4000); }
+    function fallback() {
+      pr.say('Dein Browser konnte das Teilen-Menü nicht öffnen. Die Bilder werden stattdessen als Dateien geladen.');
+      files.forEach(function (f, k) { setTimeout(function () { save(f, f.name); }, k * 400); });
+      setTimeout(function () { pr.el.remove(); }, 8000 + files.length * 400);
+      if (btn) { btn.disabled = true; btn.textContent = '✓ ' + btn.textContent; }
+    }
+    function ask(first) {
+      pr.say(first ? 'Die Bilder sind bereit. Tippe auf „Bilder sichern“, dann landen sie in deiner Fotos-App.' : 'Abgebrochen. Du kannst es noch einmal versuchen.');
+      var go = document.createElement('button');
+      go.type = 'button'; go.className = 'btn small'; go.textContent = first ? 'Jetzt sichern' : 'Nochmal öffnen';
+      go.onclick = async function () {
+        go.disabled = true;
+        var r2 = await trySharing(files);
+        go.remove();
+        if (r2 === 'ok') finish(); else if (r2 === 'cancel') ask(false); else if (r2 === 'blocked') ask(true); else fallback();
+      };
+      pr.el.appendChild(go);
+    }
+    // Wenn das Handy es noch als Folge des Tippens akzeptiert, öffnet sich das Teilen-Menü gleich, sonst mit einem zweiten Tippen
+    var r = await trySharing(files);
+    if (r === 'ok') finish(); else if (r === 'cancel') ask(false); else if (r === 'blocked') ask(true); else fallback();
+  }
+  // Einzelbild in der Großansicht (iPhone/iPad)
+  var lbReady = null;
+  async function shareOne(i) {
+    var btn = $('lbDl');
+    if (lbReady && lbReady.i === i) {
+      var r1 = await trySharing([lbReady.file]);
+      if (r1 === 'ok' || r1 === 'cancel') { lbReady = null; lbLabel(i); }
+      else if (r1 !== 'blocked') { save(lbReady.file, lbReady.file.name); lbReady = null; lbLabel(i); }
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'Wird vorbereitet…';
+    var file;
+    try { var blob = await original(i); file = new File([blob], S.m.images[i].name || ('bild-' + (i + 1) + '.jpg'), { type: blob.type || 'image/jpeg' }); }
+    catch (e) { btn.disabled = false; btn.textContent = 'Fehlgeschlagen, nochmal versuchen'; return; }
+    btn.disabled = false;
+    if (S.cur !== i) return;
+    var r = await trySharing([file]);
+    if (r === 'blocked') { lbReady = { i: i, file: file }; btn.textContent = 'Jetzt sichern'; }
+    else if (r === 'ok' || r === 'cancel') lbLabel(i);
+    else { save(file, file.name); lbLabel(i); }
+  }
+  function lbLabel(i) { var it = S.m.images[i]; $('lbDl').textContent = 'Herunterladen' + (it && it.size ? ' · ' + G.fmtBytes(it.size) : ''); }
+
+  // ZIP-Datei (zweite Möglichkeit)
+  async function zipDownload(idx, suffix) {
+    if (busy || !idx.length) return;
+    var box = $('dlbox');
+    var parts = splitParts(idx, PART_LIMIT, 0);
     var base = G.slug(S.m.title) + (suffix ? '-' + suffix : '');
     if (parts.length === 1) { box.innerHTML = ''; return zipPart(parts[0], base + '.zip', null); }
-    box.innerHTML = '<p class="hint">Die Bilder sind zusammen recht groß. Lade sie deshalb in ' + parts.length + ' Teilen herunter, einen nach dem anderen:</p><div class="parts"></div>';
-    parts.forEach(function (p, k) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'btn ghost small';
-      var bytes = p.reduce(function (s, i) { return s + (S.m.images[i].size || 0); }, 0);
-      b.textContent = 'Teil ' + (k + 1) + ' · ' + p.length + ' Bilder · ' + G.fmtBytes(bytes);
-      b.onclick = function () { zipPart(p, base + '-teil-' + (k + 1) + '.zip', b); };
-      box.querySelector('.parts').appendChild(b);
-    });
+    partsUi(box, 'Die Bilder sind zusammen recht groß. Lade sie deshalb in ' + parts.length + ' Teilen herunter, einen nach dem anderen:',
+      parts, 'Teil', function (p, k, b) { zipPart(p, base + '-teil-' + (k + 1) + '.zip', b); });
   }
   async function zipPart(idx, name, btn) {
     if (busy) return; busy = true;
@@ -424,12 +563,7 @@
         }
       }
       await Promise.all([worker(), worker(), worker()]);
-      results.forEach(function (buf, k) {
-        var nm = S.m.images[idx[k]].name || ('bild-' + (idx[k] + 1) + '.jpg');
-        var lk = nm.toLowerCase(), c = used[lk] || 0; used[lk] = c + 1;
-        if (c) { var dot = nm.lastIndexOf('.'); nm = (dot > 0 ? nm.slice(0, dot) : nm) + '-' + (c + 1) + (dot > 0 ? nm.slice(dot) : ''); }
-        zip.add(nm, buf);
-      });
+      results.forEach(function (buf, k) { zip.add(fileName(idx[k], used), buf); });
       txt.textContent = 'Fertig – der Download startet.';
       save(zip.blob(), name);
       if (btn) { btn.disabled = true; btn.textContent = '✓ ' + btn.textContent; }
@@ -439,6 +573,13 @@
     }
     busy = false;
   }
+  $('dlSel').onclick = function () {
+    var idx = Array.from(S.sel).sort(function (a, b) { return a - b; });
+    download(idx, 'auswahl');
+  };
+  $('dlAll').onclick = function () { download(allIdx(), ''); };
+  $('dlZip').onclick = function () { zipDownload(allIdx(), ''); };
+  function allIdx() { return S.m.images.map(function (_, i) { return i; }); }
 
   // ---------- Großansicht ----------
   var lb = $('lb'), lbImg = $('lbImg'), lastFocus = null;
@@ -448,7 +589,7 @@
     var it = S.m.images[i];
     $('lbPos').textContent = (i + 1) + ' / ' + S.m.images.length;
     $('lbName').textContent = it.name || '';
-    $('lbDl').textContent = 'Herunterladen' + (it.size ? ' · ' + G.fmtBytes(it.size) : '');
+    lbReady = null; $('lbDl').disabled = false; lbLabel(i);
     lbImg.alt = 'Bild ' + (i + 1);
     var th = S.thumbs[i];
     if (th) th.then(function (u) { if (S.cur === i && !lbImg.dataset.hi) lbImg.src = u; });
@@ -464,7 +605,7 @@
   function closeLb() { lb.classList.remove('open'); document.body.style.overflow = ''; lbImg.removeAttribute('src'); S.cur = -1; if (lastFocus) lastFocus.focus(); }
   function step(d) { var n = S.m.images.length; openLb((S.cur + d + n) % n); }
   $('lbX').onclick = closeLb; $('lbP').onclick = function () { step(-1); }; $('lbN').onclick = function () { step(1); };
-  $('lbDl').onclick = function () { download([S.cur], ''); };
+  $('lbDl').onclick = function () { if (SHARE) shareOne(S.cur); else download([S.cur], ''); };
   lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
   document.addEventListener('keydown', function (e) {
     if (!lb.classList.contains('open')) return;
