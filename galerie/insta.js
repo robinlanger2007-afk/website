@@ -186,7 +186,7 @@
     var list = st.order.map(function (k) { var it = st.items[k]; return { k: k, r: it.r, L: it.r > 1.15 }; });
     st.plan = plan(list, st.seed, true);
     var n = st.plan.slides.length, used = list.length - st.plan.dropped;
-    dlg.querySelector('.ig-count').textContent = ' · ' + n + ' Slides · ' + used + (used === 1 ? ' Bild' : ' Bilder');
+    dlg.querySelector('.ig-count').textContent = n + ' Slides · ' + used + (used === 1 ? ' Bild' : ' Bilder');
     var info = st.note || '';
     if (st.plan.dropped) info = (info ? info + ' ' : '') + st.plan.dropped + (st.plan.dropped === 1 ? ' Bild passt' : ' Bilder passen') + ' nicht mehr hinein (Instagram erlaubt höchstens 20 Slides).';
     dlg.querySelector('.ig-info').textContent = info || 'Die Bilder bleiben in der Reihenfolge, in der du sie ausgewählt hast. Nichts wird abgeschnitten.';

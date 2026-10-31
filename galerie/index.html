@@ -64,6 +64,7 @@
 .grid figure.on .sel{background:var(--accent);color:#17141c}
 .selbar{position:fixed;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:20;display:flex;align-items:center;gap:.5rem;flex-wrap:nowrap;justify-content:center;white-space:nowrap;padding:.55rem .6rem .55rem 1.2rem;border-radius:2rem;background:var(--ink);color:var(--bg);box-shadow:0 10px 40px rgba(0,0,0,.4);max-width:calc(100vw - 1.5rem)}
 .selbar b{font-weight:700}
+@media(max-width:460px){.selbar{gap:.35rem;padding:.45rem .45rem .45rem .95rem}.selbar .selw{display:none}.selbar b::after{content:" ✓"}.selbar .btn.small{padding:.4rem .75rem;font-size:.85rem}}
 .selbar .btn.ghost{color:var(--bg);border-color:transparent}
 .lb{position:fixed;inset:0;z-index:50;background:rgba(6,5,9,.96);display:none;align-items:center;justify-content:center;padding:calc(3.5rem + env(safe-area-inset-top,0px)) 1rem calc(6rem + env(safe-area-inset-bottom,0px));touch-action:none}
 .lb.open{display:flex}
@@ -80,7 +81,7 @@
 .ig{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
 .ig-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.6rem clamp(1rem,4vw,3rem);background:var(--bg);border-bottom:1px solid var(--line)}
 .ig-top strong{font-family:Syne,sans-serif;font-size:1.3rem}
-.ig-count{color:var(--mute);font-size:.9rem}
+.ig-count{display:block;color:var(--mute);font-size:.82rem;line-height:1.2}
 .ig-x{background:none;border:0;color:var(--ink);font-size:2rem;line-height:1;cursor:pointer;min-width:44px;min-height:44px}
 .ig-strip{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;padding:1.2rem clamp(1rem,4vw,3rem);overscroll-behavior-x:contain}
 .ig-strip figure{margin:0;flex:none;width:min(64vw,300px);scroll-snap-align:start;position:relative}
@@ -153,7 +154,7 @@
 </main>
 
 <div class="selbar" id="selbar" hidden>
-  <span><b id="selN">0</b> ausgewählt</span>
+  <span><b id="selN">0</b><span class="selw"> ausgewählt</span></span>
   <button class="btn small" id="dlSel" type="button">Herunterladen</button>
   <button class="btn small ghost" id="igSel" type="button">Insta-Post</button>
   <button class="btn small ghost" id="selClear" type="button">Fertig</button>
