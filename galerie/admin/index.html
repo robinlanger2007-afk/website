@@ -380,10 +380,11 @@ details.help .btn{margin:.4rem 0}
     var g = { pw: pw, title: m.title, until: m.until };
     var box = $('doneBox'); box.hidden = false; $('progBox').hidden = !failed;
     $('progTxt').textContent = failed ? 'Fertig. Diese Dateien wurden übersprungen:' : ''; $('progKeep').hidden = true;
-    box.innerHTML = '<div class="done"><h3 style="margin:0;font-size:1.4rem"></h3><p class="hint">Die Galerie ist ab sofort online.</p><pre></pre><div class="row" style="flex-wrap:wrap"><button class="btn small" type="button" data-a="copy">Nachricht kopieren</button><button class="btn small ghost" type="button" data-a="share" hidden>Teilen …</button></div></div>';
+    box.innerHTML = '<div class="done"><h3 style="margin:0;font-size:1.4rem"></h3><p class="hint">Die Galerie ist ab sofort online.</p><pre></pre><div class="row" style="flex-wrap:wrap"><button class="btn small" type="button" data-a="copy">Nachricht kopieren</button><button class="btn small ghost" type="button" data-a="share" hidden>Teilen …</button><button class="btn small ghost" type="button" data-a="ig">Instagram-Post erstellen</button></div></div>';
     box.querySelector('h3').textContent = '✓ ' + n + (n === 1 ? ' Bild' : ' Bilder') + ' hochgeladen' + (failed ? ' (' + failed + ' übersprungen)' : '');
     box.querySelector('pre').textContent = message(g);
     box.querySelector('[data-a=copy]').onclick = function () { copy(message(g)); };
+    box.querySelector('[data-a=ig]').onclick = function () { window.open(SITE + '#k=' + encodeURIComponent(pw) + '&ig=1', '_blank', 'noopener'); };
     if (navigator.share) { var s = box.querySelector('[data-a=share]'); s.hidden = false; s.onclick = function () { navigator.share({ text: message(g) }).catch(function () {}); }; }
     box.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -432,6 +433,7 @@ details.help .btn{margin:.4rem 0}
         btn('Nachricht kopieren', '', function () { copy(message(g)); });
         btn('Ansehen', 'ghost', function () { window.open(SITE + '#k=' + encodeURIComponent(g.pw), '_blank', 'noopener'); });
         btn('Bilder hinzufügen', 'ghost', function () { startAdd(g, this); });
+        btn('Instagram-Post', 'ghost', function () { window.open(SITE + '#k=' + encodeURIComponent(g.pw) + '&ig=1', '_blank', 'noopener'); });
       }
       if (r) btn('Löschen', 'danger', function () { del(id, g, r, this); });
       else if (g) btn('Aus Liste entfernen', 'ghost', function () { list = list.filter(function (x) { return x.id !== id; }); save('galerie-list', list); renderList(); });

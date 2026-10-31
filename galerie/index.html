@@ -76,6 +76,29 @@
 .lb .bar .name{max-width:90vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb .wait{position:absolute;color:#f3eee6}
 .empty{padding:3rem 0;color:var(--mute)}
+/* Instagram-Post */
+.ig{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.ig-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.6rem clamp(1rem,4vw,3rem);background:var(--bg);border-bottom:1px solid var(--line)}
+.ig-top strong{font-family:Syne,sans-serif;font-size:1.3rem}
+.ig-count{color:var(--mute);font-size:.9rem}
+.ig-x{background:none;border:0;color:var(--ink);font-size:2rem;line-height:1;cursor:pointer;min-width:44px;min-height:44px}
+.ig-strip{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;padding:1.2rem clamp(1rem,4vw,3rem);overscroll-behavior-x:contain}
+.ig-strip figure{margin:0;flex:none;width:min(64vw,300px);scroll-snap-align:start;position:relative}
+.ig-strip canvas{display:block;width:100%;height:auto;aspect-ratio:4/5;background:var(--card);box-shadow:0 2px 14px rgba(0,0,0,.18)}
+.ig-strip figcaption{position:absolute;top:.4rem;left:.4rem;min-width:1.6rem;height:1.6rem;display:grid;place-items:center;border-radius:1rem;background:rgba(10,9,14,.6);color:#fff;font-size:.78rem;font-weight:700;padding:0 .4rem}
+.ig-ctrl{display:grid;gap:1rem;max-width:640px;padding:0 clamp(1rem,4vw,3rem) 2.5rem}
+.ig-lab{font-weight:600;font-size:.95rem;margin-bottom:-.5rem}
+.ig-covers{display:flex;gap:.45rem;overflow-x:auto;padding:.2rem 0 .4rem}
+.ig-cv{flex:none;width:58px;height:58px;padding:0;border:2px solid transparent;border-radius:.5rem;overflow:hidden;background:var(--card);cursor:pointer}
+.ig-cv img{width:100%;height:100%;object-fit:cover;display:block}
+.ig-cv.on{border-color:var(--accent)}
+.ig-field{display:grid;gap:.35rem}
+.ig .check{display:flex;gap:.7rem;align-items:flex-start;font-weight:400}
+.ig .check input{width:1.2rem;height:1.2rem;margin:.2rem 0 0;accent-color:var(--accent);flex:none}
+.ig-seg{display:inline-flex;border:1px solid var(--line);border-radius:2rem;padding:3px;justify-self:start}
+.ig-seg button{background:none;border:0;color:var(--ink);font:600 .95rem Manrope,sans-serif;padding:.5rem 1.2rem;border-radius:2rem;cursor:pointer;min-height:40px}
+.ig-seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.ig-acts{display:flex;flex-wrap:wrap;gap:.6rem;position:sticky;bottom:0;z-index:2;background:var(--bg);padding:.8rem 0 calc(.8rem + env(safe-area-inset-bottom,0px));margin-bottom:-1rem}
 @media(max-width:420px){header.top nav{gap:.9rem}header.top a{font-size:.85rem}}
 </style>
 </head>
@@ -115,6 +138,7 @@
         <div class="actions">
           <button class="btn" id="dlAll" type="button">Alle herunterladen</button>
           <button class="btn ghost" id="selMode" type="button" aria-pressed="false">Bilder auswählen</button>
+          <button class="btn ghost" id="igAll" type="button">Instagram-Post</button>
           <button class="btn ghost" id="logout" type="button">Abmelden</button>
         </div>
         <p class="ziplink"><button type="button" class="linkbtn" id="dlZip">Lieber alle Bilder als ZIP-Datei?</button></p>
@@ -131,6 +155,7 @@
 <div class="selbar" id="selbar" hidden>
   <span><b id="selN">0</b> ausgewählt</span>
   <button class="btn small" id="dlSel" type="button">Herunterladen</button>
+  <button class="btn small ghost" id="igSel" type="button">Insta-Post</button>
   <button class="btn small ghost" id="selClear" type="button">Fertig</button>
 </div>
 
@@ -148,6 +173,7 @@
 
 <script src="config.js"></script>
 <script src="shared.js"></script>
+<script src="insta.js"></script>
 <script>
 (function () {
   'use strict';
@@ -211,7 +237,7 @@
     if (m.note) { $('gnote').textContent = m.note; $('gnote').hidden = false; }
     if (m.until) { $('until').textContent = 'Download möglich bis ' + G.fmtDate(m.until); $('until').hidden = false; }
     $('empty').hidden = imgs.length > 0;
-    $('dlAll').hidden = $('selMode').hidden = imgs.length === 0;
+    $('dlAll').hidden = $('selMode').hidden = $('igAll').hidden = imgs.length === 0;
     var grid = $('grid'); grid.innerHTML = '';
     imgs.forEach(function (it, i) {
       var f = document.createElement('figure');
@@ -225,6 +251,7 @@
     $('lock').hidden = true; $('gal').hidden = false;
     window.scrollTo(0, 0);
     startHero();
+    if (S.openIg && imgs.length) { S.openIg = false; openInsta(allIdx()); }
   }
 
   $('grid').addEventListener('click', function (e) {
@@ -346,7 +373,7 @@
   function updSel() {
     $('selN').textContent = S.sel.size;
     $('selbar').hidden = !(S.selecting || S.sel.size);
-    $('dlSel').disabled = !S.sel.size;
+    $('dlSel').disabled = $('igSel').disabled = !S.sel.size;
   }
   $('selMode').onclick = function () {
     S.selecting = !S.selecting;
@@ -581,6 +608,28 @@
   $('dlZip').onclick = function () { zipDownload(allIdx(), ''); };
   function allIdx() { return S.m.images.map(function (_, i) { return i; }); }
 
+  // ---------- Instagram-Post ----------
+  // Ausgewählte Bilder in der Reihenfolge, in der sie angetippt wurden; ohne Auswahl alle (höchstens 36)
+  var IG_MAX = 36;
+  var SHARE_FILES = (function () {
+    try { return !!(navigator.share && navigator.canShare && window.matchMedia('(pointer: coarse)').matches && navigator.canShare({ files: [new File([new Blob(['x'])], 'a.jpg', { type: 'image/jpeg' })] })); }
+    catch (e) { return false; }
+  })();
+  function openInsta(idx) {
+    if (!window.GalerieInsta || !idx.length) return;
+    var note = '';
+    if (idx.length > IG_MAX) { note = 'Es werden die ersten ' + IG_MAX + ' Bilder verwendet. Wähle Bilder aus, um selbst zu bestimmen, welche hineinkommen.'; idx = idx.slice(0, IG_MAX); }
+    window.GalerieInsta.open({
+      images: idx.map(function (i) { var it = S.m.images[i]; return { i: i, w: it.w, h: it.h }; }),
+      title: S.m.title, note: note,
+      fetchP: function (i) { return fetchDec('p', S.m.images[i].n); },
+      thumb: function (i) { return getImg('t', i); },
+      save: save, share: trySharing, canShare: SHARE_FILES, slug: G.slug
+    });
+  }
+  $('igAll').onclick = function () { openInsta(S.sel.size ? Array.from(S.sel) : allIdx()); };
+  $('igSel').onclick = function () { openInsta(Array.from(S.sel)); };
+
   // ---------- Großansicht ----------
   var lb = $('lb'), lbImg = $('lbImg'), lastFocus = null;
   async function openLb(i) {
@@ -622,8 +671,9 @@
 
   // ---------- Start: Passwort aus Link (#k=…) oder aus dieser Sitzung ----------
   function fromHash() {
-    var hk = new URLSearchParams(location.hash.slice(1)).get('k');
+    var hp = new URLSearchParams(location.hash.slice(1)), hk = hp.get('k');
     if (!hk) return false;
+    if (hp.get('ig') === '1') S.openIg = true;
     history.replaceState(null, '', location.pathname); $('pw').value = hk; unlock(hk);
     return true;
   }
