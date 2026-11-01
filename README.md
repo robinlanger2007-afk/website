@@ -17,6 +17,7 @@ Portfolio-Seite von Robin Langer, Fotograf in Leipzig. Eine einzige Seite aus re
 | `galerie/` | Kundengalerie (eigenes Projekt von Robin, hat mit dem Rest nichts zu tun) |
 | `tools/add_photos.py` | neue Fotos hinzufügen |
 | `tools/formular-empfang.gs` | Google-Skript, das Anfragen aus dem Formular in Robins Postfach legt |
+| `fonts/` | Schriften „Syne“ und „Manrope“, selbst gehostet (variable WOFF-Dateien, nur lateinische Zeichen) samt Lizenztexten (SIL Open Font License). Hauptseite, Kundengalerie und Admin laden sie von hier, nicht von Google Fonts |
 | `404.html` | Eigene „Seite nicht gefunden“-Seite (GitHub Pages liefert sie automatisch) |
 | `apple-touch-icon.png`, `favicon.ico` | Symbol für den iPhone-Homescreen und Browser-Tab (dunkel mit „RL“) |
 
@@ -52,6 +53,7 @@ Kategorien sind `geburtstag`, `club` und `c1792272530021` (Portraits). Pro Kateg
 - Impressum und Datenschutz: als HTML im Dialog `dlg-impressum` / `dlg-datenschutz`. Die englische Fassung steht in den Listen `IMP` und `DSG` im selben Skript und **muss genauso viele Absätze haben wie die deutsche**, sonst bleibt die englische Ansicht deutsch.
 - **Datenschutztext mitpflegen:** Sobald die Seite etwas Neues speichert (Local Storage, Cookies) oder einen fremden Server anspricht (Schrift, Karte, Video, Statistik, Einbettung), muss der Datenschutztext in beiden Sprachen angepasst werden. Neue oder geänderte Stellen stehen in `DSG` für Spanisch und Französisch zunächst auf Englisch.
 - **E-Mail-Adresse ändern:** Die Adresse steht in `index.html` (Kontakt, Impressum, Datenschutz, Notlösung des Formulars, `mailNow`, Fotoliste `pdata`) und im Google-Skript `tools/formular-empfang.gs` bei `EMPFAENGER`. Zuerst überall ersetzen (Suchen und Ersetzen über die ganze Datei), dann das Skript neu bereitstellen, sonst landen Formular-Anfragen noch im alten Postfach. Aktuell: langer.photo.leipzig@gmail.com.
+- **Schriften:** Die Schriften liegen in `fonts/` und werden in `index.html`, `galerie/index.html` und `galerie/admin/index.html` über `@font-face` (am Anfang des ersten `<style>`) und je ein `preload` im `<head>` eingebunden. Es gibt keine Anfrage an Google, deshalb steht im Datenschutztext nichts mehr zu Google Fonts. Eine andere Schrift braucht neue Dateien in `fonts/` (am besten WOFF2, nur Latin), angepasste `@font-face`-Zeilen in allen drei Dateien und einen Blick in den Datenschutzpunkt 4. Nie wieder einen `<link>` auf fonts.googleapis.com einbauen, sonst gehen Besucher-IPs an Google und der Datenschutztext stimmt nicht mehr. `404.html` nutzt nur Systemschriften.
 - Sprachen: nur Deutsch und Englisch sind im Angebot (`OFFER`). Spanisch und Französisch sind im Code vorbereitet, aber nicht freigeschaltet.
 
 ## Anfrage-Formular

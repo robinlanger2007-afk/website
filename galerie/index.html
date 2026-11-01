@@ -6,9 +6,15 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>Kundengalerie – Robin Langer</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&amp;family=Manrope:wght@400;500;600&amp;display=swap">
+<link rel="preload" href="/fonts/Syne-VF.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/fonts/Manrope-VF.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="style.css">
 <style>
+@font-face{font-family:Syne;font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/Syne-VF.woff) format("woff")}
+@font-face{font-family:Syne;font-style:normal;font-weight:800;font-display:swap;src:url(/fonts/Syne-VF.woff) format("woff")}
+@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/Manrope-VF.woff) format("woff")}
+@font-face{font-family:Manrope;font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/Manrope-VF.woff) format("woff")}
+@font-face{font-family:Manrope;font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/Manrope-VF.woff) format("woff")}
 .lock{display:flex;align-items:center;padding:clamp(2rem,8vw,6rem) 0}
 .lock .wrap{width:100%;display:grid;gap:2.5rem;align-items:end}
 @media(min-width:900px){.lock .wrap{grid-template-columns:1.2fr 1fr}}
