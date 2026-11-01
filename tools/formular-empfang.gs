@@ -6,7 +6,7 @@
  * an ihn; dafür merkt sich der Cache sechs Stunden lang nur einen Hash der Adresse.
  * Einrichtung: siehe README.md, Abschnitt "Anfrage-Formular".
  */
-var EMPFAENGER = 'robin.langer2007@gmail.com';
+var EMPFAENGER = 'langer.photo.leipzig@gmail.com';
 var MAX_PRO_STUNDE = 20;   // Schutz davor, dass jemand das Postfach und das Tageslimit vollmüllt
 var BESTAETIGUNG = true;   // false = keine automatische Bestätigung an den Absender
 var BESTAETIGUNG_SPERRE = 21600;   // Sekunden (6 Stunden, das Maximum des Cache): pro Adresse höchstens eine Bestätigung

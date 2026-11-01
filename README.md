@@ -51,6 +51,7 @@ Kategorien sind `geburtstag`, `club` und `c1792272530021` (Portraits). Pro Kateg
 - Untertitel und „Über mich“: im Block `pdata` (`texts`).
 - Impressum und Datenschutz: als HTML im Dialog `dlg-impressum` / `dlg-datenschutz`. Die englische Fassung steht in den Listen `IMP` und `DSG` im selben Skript und **muss genauso viele Absätze haben wie die deutsche**, sonst bleibt die englische Ansicht deutsch.
 - **Datenschutztext mitpflegen:** Sobald die Seite etwas Neues speichert (Local Storage, Cookies) oder einen fremden Server anspricht (Schrift, Karte, Video, Statistik, Einbettung), muss der Datenschutztext in beiden Sprachen angepasst werden. Neue oder geänderte Stellen stehen in `DSG` für Spanisch und Französisch zunächst auf Englisch.
+- **E-Mail-Adresse ändern:** Die Adresse steht in `index.html` (Kontakt, Impressum, Datenschutz, Notlösung des Formulars, `mailNow`, Fotoliste `pdata`) und im Google-Skript `tools/formular-empfang.gs` bei `EMPFAENGER`. Zuerst überall ersetzen (Suchen und Ersetzen über die ganze Datei), dann das Skript neu bereitstellen, sonst landen Formular-Anfragen noch im alten Postfach. Aktuell: langer.photo.leipzig@gmail.com.
 - Sprachen: nur Deutsch und Englisch sind im Angebot (`OFFER`). Spanisch und Französisch sind im Code vorbereitet, aber nicht freigeschaltet.
 
 ## Anfrage-Formular
