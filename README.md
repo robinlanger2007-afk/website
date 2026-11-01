@@ -19,7 +19,7 @@ Portfolio-Seite von Robin Langer, Fotograf in Leipzig. Eine einzige Seite aus re
 | `tools/formular-empfang.gs` | Google-Skript, das Anfragen aus dem Formular in Robins Postfach legt |
 | `fonts/` | Schriften „Syne“ und „Manrope“, selbst gehostet (variable WOFF-Dateien, nur lateinische Zeichen) samt Lizenztexten (SIL Open Font License). Hauptseite, Kundengalerie und Admin laden sie von hier, nicht von Google Fonts |
 | `404.html` | Eigene „Seite nicht gefunden“-Seite (GitHub Pages liefert sie automatisch) |
-| `apple-touch-icon.png`, `favicon.ico` | Symbol für den iPhone-Homescreen und Browser-Tab (dunkel mit „RL“) |
+| `favicon.ico`, `favicon.svg`, `icon-192.png`, `apple-touch-icon.png` | Symbol für Browser-Tab, Google-Suchergebnis und iPhone-Homescreen (gold mit dunklem „R / L“ in Syne). Muss als echte Datei eingebunden sein, Google liest keine Icons, die direkt im HTML stehen (`data:`). Neu erzeugen: aus `fonts/Syne-VF.woff`, Weight 800 |
 
 ## Instagram-Post aus der Kundengalerie
 
