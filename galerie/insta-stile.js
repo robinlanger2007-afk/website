@@ -1,4 +1,4 @@
-/* Kundengalerie – Stile für den Instagram-Post (Gold, Blumen, Schnörkel, Nacht).
+/* Kundengalerie – Stile für den Instagram-Post (Gold, Blumen, Schnörkel, Nacht, dazu Blumen und Schnörkel einfarbig).
    Jeder Stil zeichnet eine Slide in drei Schritten:
      behind(ctx, E)      Hintergrund und Verzierungen hinter den Fotos
      mat(ctx, E, r)      Rahmen / Papierrand / Leuchten direkt hinter einem Foto (r = Foto-Rechteck)
@@ -14,7 +14,6 @@
 
   // ---------- Hilfen ----------
   function rgba(c, a) { var n = parseInt(c.slice(1), 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; }
-  function pad(n) { return String(n).padStart(2, '0'); }
   function hit(a, b) { return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h; }
   function rr(R, a, b) { return a + R() * (b - a); }
   // freie Fläche w × h suchen (ohne Fotos, Fußzeile, Cover-Titel)
@@ -292,7 +291,6 @@
         ctx.fillStyle = P.gold;
         if (E.first) diamond(ctx, MX, hy, 6);
         if (E.last) diamond(ctx, W - MX, hy, 6);
-        spaced(ctx, pad(k + 1) + ' / ' + pad(n), MX, fy, 18, 'left', P.gold, 600, 'Manrope', 0.18);
         ctx.globalAlpha = 0.62; spaced(ctx, CREDIT, W / 2, fy, 15, 'center', P.ink, 500, 'Manrope', 0.28); ctx.globalAlpha = 1;
         ctx.strokeStyle = P.gold; ctx.fillStyle = P.gold; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
         if (k < n - 1) {
@@ -303,20 +301,17 @@
     };
   })();
 
-  // Blumen: Papierrand um die Fotos, gezeichnete Ranken und Blüten, kursive Schrift
-  (function () {
-    var PAL = {
-      dark: { bg: '#111513', ink: '#eee6d8', sage: '#8fb28b', rose: '#e9a898', gold: '#e4bd70', paper: '#efe8da', shadow: 'rgba(0,0,0,0.55)' },
-      light: { bg: '#f4eee3', ink: '#3a2e28', sage: '#62865d', rose: '#cc6f59', gold: '#b98a2e', paper: '#fffdf8', shadow: 'rgba(70,45,30,0.28)' }
-    };
-    styles.blumen = {
-      name: 'Blumen', shift: 6, fonts: ['italic 400 60px Cardo', '400 20px Cardo'],
+  // Blumen: Papierrand um die Fotos, gezeichnete Ranken und Blüten, kursive Schrift.
+  // o.glow: farbiger Lichtschein; o.hair: feine Linie um den Papierrand (für die einfarbige Fassung)
+  function blumenStyle(name, PAL, o) {
+    return {
+      name: name, shift: 6, fonts: ['italic 400 60px Cardo', '400 20px Cardo'],
       pal: function (th) { return PAL[th]; },
       behind: function (ctx, E) {
         var P = E.p, R = E.R;
         ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
-        glow(ctx, E.k % 2 ? W * 0.15 : W * 0.85, E.k % 2 ? H * 0.9 : H * 0.12, 760, P.rose, E.theme === 'dark' ? 0.09 : 0.14);
-        grain(ctx, 0.045);
+        if (o.glow) glow(ctx, E.k % 2 ? W * 0.15 : W * 0.85, E.k % 2 ? H * 0.9 : H * 0.12, 760, P.rose, E.theme === 'dark' ? 0.09 : 0.14);
+        grain(ctx, o.glow ? 0.045 : 0.03);
         ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, E.clipY); ctx.clip();
         // Ecken-Sträuße samt Ranken, bei Panoramen in Gesamt-Koordinaten (passt über die Kante)
         ctx.save(); ctx.translate(-E.part * W, 0);
@@ -339,6 +334,7 @@
         ctx.save(); ctx.shadowColor = E.p.shadow; ctx.shadowBlur = 26 * E.scale; ctx.shadowOffsetY = 8 * E.scale;
         ctx.fillStyle = E.p.paper; ctx.fillRect(r.x - b, r.y - b, r.w + 2 * b, r.h + 2 * b);
         ctx.restore();
+        if (o.hair) { ctx.strokeStyle = rgba(E.p.ink, 0.55); ctx.lineWidth = 1.2; ctx.strokeRect(r.x - b, r.y - b, r.w + 2 * b, r.h + 2 * b); }
       },
       front: function (ctx, E) {
         var P = E.p, k = E.k, n = E.n, R = E.R;
@@ -362,28 +358,32 @@
         line(ctx, a, hy, W / 2 - 66, hy); line(ctx, W / 2 + 66, hy, b, hy); ctx.globalAlpha = 1;
         leaf(ctx, W / 2 - 14, hy, PI + 0.15, 46, 9, P.sage); leaf(ctx, W / 2 + 14, hy, -0.15, 46, 9, P.sage);
         blossom(ctx, W / 2, hy, 11, 5, 0.2, P.rose, P.gold, false);
-        spaced(ctx, pad(k + 1) + ' / ' + pad(n), MX, fy, 24, 'left', P.rose, 400, 'Cardo', 0.06, true);
         ctx.globalAlpha = 0.75; spaced(ctx, CREDIT, W / 2, fy, 15, 'center', P.ink, 400, 'Cardo', 0.2); ctx.globalAlpha = 1;
         if (k < n - 1) { ctx.strokeStyle = P.rose; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; arrow(ctx, W - MX - 10, fy); }
         else blossom(ctx, W - MX - 12, fy, 13, 5, 0.3, P.rose, P.gold, false);
       }
     };
-  })();
+  }
+  styles.blumen = blumenStyle('Blumen', {
+    dark: { bg: '#111513', ink: '#eee6d8', sage: '#8fb28b', rose: '#e9a898', gold: '#e4bd70', paper: '#efe8da', shadow: 'rgba(0,0,0,0.55)' },
+    light: { bg: '#f4eee3', ink: '#3a2e28', sage: '#62865d', rose: '#cc6f59', gold: '#b98a2e', paper: '#fffdf8', shadow: 'rgba(70,45,30,0.28)' }
+  }, { glow: true });
+  // Einfarbig: Schwarz auf Hell, Weiß auf Dunkel – dieselben gezeichneten Blumen, nur in einer Farbe
+  styles.blumenSW = blumenStyle('Blumen s/w', {
+    dark: { bg: '#0a0a0a', ink: '#f2f0ec', sage: '#f2f0ec', rose: '#f2f0ec', gold: '#f2f0ec', paper: '#f2f0ec', shadow: 'rgba(0,0,0,0.6)' },
+    light: { bg: '#f6f5f2', ink: '#141414', sage: '#141414', rose: '#141414', gold: '#141414', paper: '#ffffff', shadow: 'rgba(0,0,0,0.26)' }
+  }, { hair: true });
 
-  // Schnörkel: Gold-Ornamente, Doppelrahmen mit Eck-Schnörkeln, Zierstücke in freien Flächen
-  (function () {
-    var PAL = {
-      dark: { bg: '#0e0c0b', ink: '#efe6d2', gold: '#d6b165', glow: 0.14 },
-      light: { bg: '#f3ecdb', ink: '#2d261f', gold: '#94701f', glow: 0.24 }
-    };
-    styles.schnoerkel = {
-      name: 'Schnörkel', shift: 6, fonts: ['400 20px Cardo', 'italic 400 40px Cardo'],
+  // Schnörkel: Ornamente, Doppelrahmen mit Eck-Schnörkeln, Zierstücke in freien Flächen
+  function schnoerkelStyle(name, PAL, o) {
+    return {
+      name: name, shift: 6, fonts: ['400 20px Cardo', 'italic 400 40px Cardo'],
       pal: function (th) { return PAL[th]; },
       behind: function (ctx, E) {
         var P = E.p, R = E.R;
         ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
-        glow(ctx, W / 2, E.k % 2 ? H * 0.8 : H * 0.18, 900, '#e2b45a', P.glow);
-        grain(ctx, 0.05);
+        if (P.glow) glow(ctx, W / 2, E.k % 2 ? H * 0.8 : H * 0.18, 900, '#e2b45a', P.glow);
+        grain(ctx, P.glow ? 0.05 : 0.03);
         slideFrame(ctx, E, P.gold);
         // Zierstücke in freien Flächen: waagerecht, senkrecht, klein
         var a = spot(E, 330, 100, 60);
@@ -414,13 +414,21 @@
         ctx.lineWidth = 1.6; line(ctx, a, hy, W / 2 - 96, hy); line(ctx, W / 2 + 96, hy, b, hy);
         ctx.lineWidth = 0.9; line(ctx, a, hy + 5, W / 2 - 96, hy + 5); line(ctx, W / 2 + 96, hy + 5, b, hy + 5);
         fleuron(ctx, W / 2, hy + 2, 150, P.gold);
-        spaced(ctx, pad(k + 1) + ' / ' + pad(n), MX, fy, 24, 'left', P.gold, 400, 'Cardo', 0.06, true);
         ctx.globalAlpha = 0.78; spaced(ctx, CREDIT, W / 2, fy, 15, 'center', P.ink, 400, 'Cardo', 0.2); ctx.globalAlpha = 1;
         ctx.strokeStyle = P.gold; ctx.fillStyle = P.gold; ctx.lineWidth = 2.2; ctx.lineJoin = 'round';
         if (k < n - 1) arrow(ctx, W - MX - 10, fy); else diamond(ctx, W - MX - 10, fy, 8);
       }
     };
-  })();
+  }
+  styles.schnoerkel = schnoerkelStyle('Schnörkel', {
+    dark: { bg: '#0e0c0b', ink: '#efe6d2', gold: '#d6b165', glow: 0.14 },
+    light: { bg: '#f3ecdb', ink: '#2d261f', gold: '#94701f', glow: 0.24 }
+  });
+  // Einfarbig: Schwarz auf Hell, Weiß auf Dunkel
+  styles.schnoerkelSW = schnoerkelStyle('Schnörkel s/w', {
+    dark: { bg: '#0a0a0a', ink: '#f2f0ec', gold: '#f2f0ec', glow: 0 },
+    light: { bg: '#f6f5f2', ink: '#141414', gold: '#141414', glow: 0 }
+  });
 
   // Nacht: Club-Look mit Lichtflecken, Glanzsternen, Sternbild, Sternschnuppe und Neon-Rand
   (function () {
@@ -496,7 +504,6 @@
         var fy = H - 40, hy = H - 72, a0 = E.first ? MX : 0, b0 = E.last ? W - MX : W;
         var lg = ctx.createLinearGradient(a0, 0, b0, 0); lg.addColorStop(0, P.b); lg.addColorStop(0.5, P.c); lg.addColorStop(1, P.a);
         ctx.save(); ctx.strokeStyle = lg; ctx.lineWidth = 2.4; ctx.shadowColor = P.c; ctx.shadowBlur = 12 * sc; line(ctx, a0, hy, b0, hy); ctx.restore();
-        spaced(ctx, pad(k + 1) + ' / ' + pad(n), MX, fy, 18, 'left', P.b, 600, 'Manrope', 0.18);
         ctx.globalAlpha = 0.7; spaced(ctx, CREDIT, W / 2, fy, 15, 'center', P.ink, 500, 'Manrope', 0.28); ctx.globalAlpha = 1;
         ctx.strokeStyle = P.a; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
         if (k < n - 1) arrow(ctx, W - MX - 10, fy); else star(ctx, W - MX - 10, fy, 13, P.gold, 14, sc);
@@ -505,7 +512,7 @@
   })();
 
   window.GalerieStile = {
-    K: K, order: ['gold', 'blumen', 'schnoerkel', 'nacht'], styles: styles,
+    K: K, order: ['gold', 'blumen', 'blumenSW', 'schnoerkel', 'schnoerkelSW', 'nacht'], styles: styles,
     // Fotos dürfen nicht überdeckt werden: gesperrte Flächen für freie Verzierungen
     blockedFor: function (rects, cover, text) {
       var b = rects.map(function (r) { return { x: r.x - 28, y: r.y - 28, w: r.w + 56, h: r.h + 56 }; });
