@@ -4,7 +4,14 @@
 (function () {
   'use strict';
   var W = 1080, H = 1350, MAX_SLIDES = 20, SRC_MAX = 1400;
-  var THEMES = { light: { bg: '#f7f5f1', ink: '#2d2b29' }, dark: { bg: '#121116', ink: '#e9e5df' } };
+  // Gestaltung: goldener Rahmen, um FR versetzt hinter jedem Foto; Ecken-Winkel; Fußzeile mit Haarlinie.
+  // Fotos (samt Rahmen) bleiben im Sicherheitsrand MX / TOP / BOT, nur der Cover-Titel braucht CT extra.
+  var FR = 14, MX = 56, TOP = 64, BOT = 104, CT = 130;
+  var ZW = W - 2 * MX, ZH = H - TOP - BOT;
+  var THEMES = {
+    light: { bg: '#f6f3ed', ink: '#2a2826', gold: '#b87a12', glow: 0.2, grain: 0.05 },
+    dark: { bg: '#0e0d12', ink: '#ece8e1', gold: '#f0b44c', glow: 0.17, grain: 0.05 }
+  };
   var CREDIT = 'FOTOS · LANGER-PHOTO.DE';
 
   // ---------- Hilfen ----------
@@ -15,45 +22,46 @@
   function shuffle(a, R) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(R() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   // Bild vollständig in eine Box einpassen (nie beschneiden)
   function fit(r, bw, bh) { var w = bw, h = bw / r; if (h > bh) { h = bh; w = bh * r; } return { w: w, h: h }; }
+  function fitF(r, bw, bh) { return fit(r, bw - FR, bh - FR); }   // Box einschließlich Rahmen-Versatz
   function P(it, x, y, w, h) { return { k: it.k, x: x, y: y, w: w, h: h }; }
 
   // ---------- Layouts (Koordinaten einer Slide, Panorama: zwei Slides breit) ----------
   function cover(a, text) {
-    var f = fit(a.r, W - 96, text ? H - 48 - 142 : H - 96);
-    return [P(a, (W - f.w) / 2, text ? 48 : (H - f.h) / 2, f.w, f.h)];
+    var top = text ? 48 : TOP, zh = text ? H - 48 - BOT - CT : ZH, f = fitF(a.r, ZW, zh);
+    return [P(a, MX + (ZW - f.w - FR) / 2, top + (zh - f.h - FR) / 2, f.w, f.h)];
   }
   function single(a) {
-    var f = fit(a.r, W - 96, H - 96);
-    return [P(a, (W - f.w) / 2, (H - f.h) / 2, f.w, f.h)];
+    var f = fitF(a.r, ZW, ZH);
+    return [P(a, MX + (ZW - f.w - FR) / 2, TOP + (ZH - f.h - FR) / 2, f.w, f.h)];
   }
   function pair(a, b, v) {           // zwei Hochformate nebeneinander, versetzt oder gerade
-    var cw = 495, fa = fit(a.r, cw, 1150), fb = fit(b.r, cw, 1150);
-    var st = v === 2 ? 0 : 200, mx = Math.max(fa.h, fb.h);
-    if (mx + st > 1290) st = Math.max(0, 1290 - mx);
+    var G = 44, cw = (ZW - G) / 2, fa = fitF(a.r, cw, 1050), fb = fitF(b.r, cw, 1050);
+    var st = v === 2 ? 0 : 160, mx = Math.max(fa.h, fb.h) + FR;
+    if (mx + st > ZH) st = Math.max(0, ZH - mx);
     var ya = v === 1 ? st : 0, yb = v === 0 ? st : 0;
-    var top = (H - Math.max(ya + fa.h, yb + fb.h)) / 2;
-    return [P(a, 30 + (cw - fa.w) / 2, top + ya, fa.w, fa.h), P(b, 555 + (cw - fb.w) / 2, top + yb, fb.w, fb.h)];
+    var top = TOP + (ZH - Math.max(ya + fa.h, yb + fb.h) - FR) / 2;
+    return [P(a, MX + (cw - fa.w - FR) / 2, top + ya, fa.w, fa.h), P(b, MX + cw + G + (cw - fb.w - FR) / 2, top + yb, fb.w, fb.h)];
   }
-  function stack(a, b, v) {          // zwei Querformate übereinander, leicht versetzt
-    var bw = 900, ha = bw / a.r, hb = bw / b.r, s = Math.min(1, (H - 96 - 30) / (ha + hb));
+  function stack(a, b, v) {          // zwei Querformate übereinander, seitlich versetzt
+    var gap = 40, bw = 850, ha = bw / a.r, hb = bw / b.r, s = Math.min(1, (ZH - 2 * FR - gap) / (ha + hb));
     var wa = bw * s, wb = bw * s; ha *= s; hb *= s;
-    var top = (H - ha - hb - 30) / 2;
-    return [P(a, v ? W - 48 - wa : 48, top, wa, ha), P(b, v ? 48 : W - 48 - wb, top + ha + 30, wb, hb)];
+    var top = TOP + (ZH - ha - hb - gap - 2 * FR) / 2;
+    return [P(a, v ? W - MX - FR - wa : MX, top, wa, ha), P(b, v ? MX : W - MX - FR - wb, top + ha + FR + gap, wb, hb)];
   }
   function bigSmall(a, b, v) {       // groß + klein, diagonal
-    var fa = fit(a.r, 640, 960), fb = fit(b.r, 330, 495);
-    if (v) return [P(a, W - 48 - fa.w, 110, fa.w, fa.h), P(b, 48, H - 110 - fb.h, fb.w, fb.h)];
-    return [P(a, 48, 110, fa.w, fa.h), P(b, W - 48 - fb.w, H - 110 - fb.h, fb.w, fb.h)];
+    var fa = fitF(a.r, 610, 880), fb = fitF(b.r, 320, 470), ay = TOP + 30, by = H - BOT - FR - fb.h - 10;
+    if (v) return [P(a, W - MX - FR - fa.w, ay, fa.w, fa.h), P(b, MX, by, fb.w, fb.h)];
+    return [P(a, MX, ay, fa.w, fa.h), P(b, W - MX - FR - fb.w, by, fb.w, fb.h)];
   }
   function pano(a, b, c, v) {        // drei Bilder über zwei Slides, das mittlere läuft über die Kante
-    var hb = 1100, wb = hb * b.r, xb = W - 0.62 * wb;
-    var ha = Math.min(780, (xb - 40 - 60) / a.r), xc = xb + wb + 40;
-    var hc = Math.min(900, (2 * W - 60 - xc) / c.r, H - 200);
+    var G = 56, hb = 1000, wb = hb * b.r, xb = W - 0.62 * wb;
+    var ha = Math.min(760, (xb - G - FR - MX) / a.r), xc = xb + wb + FR + G;
+    var hc = Math.min(860, (2 * W - MX - FR - xc) / c.r);
     if (ha < 520 || hc < 520 || xb < 300) return null;
     var wa = ha * a.r, wc = hc * c.r;
-    xc = 2 * W - 60 - wc;
-    var ya = v ? H - 110 - ha : 110, yb = v ? 100 : 150, yc = v ? 110 : H - 90 - hc;
-    return [P(a, 60, ya, wa, ha), P(b, xb, yb, wb, hb), P(c, xc, yc, wc, hc)];
+    xc = 2 * W - MX - FR - wc;
+    var ya = v ? H - BOT - FR - ha - 20 : TOP + 40, yb = v ? 90 : 150, yc = v ? TOP + 40 : H - BOT - FR - hc - 20;
+    return [P(a, MX, ya, wa, ha), P(b, xb, yb, wb, hb), P(c, xc, yc, wc, hc)];
   }
 
   // ---------- Planung: Reihenfolge bleibt, das erste Bild ist das Cover ----------
@@ -87,7 +95,7 @@
     var out = [], x0 = 0;
     slides.forEach(function (s) {
       s.items.forEach(function (p) { p.gx = x0 + p.x; });
-      for (var k = 0; k < s.span; k++) out.push({ items: s.items, off: x0 + k * W, cover: s.cover && k === 0 });
+      for (var k = 0; k < s.span; k++) out.push({ items: s.items, off: x0 + k * W, cover: s.cover && k === 0, part: k, parts: s.span });
       x0 += s.span * W;
     });
     return { slides: out, dropped: q.length };
@@ -109,35 +117,94 @@
     if (bmp.close) bmp.close();
     return out;
   }
-  function spaced(ctx, t, x, y, size, align, color) {
-    ctx.font = '500 ' + size + 'px Manrope, system-ui, sans-serif';
-    ctx.fillStyle = color; ctx.textBaseline = 'middle';
-    var sp = size * 0.3, chars = Array.from(t), ws = chars.map(function (ch) { return ctx.measureText(ch).width; });
-    var tw = ws.reduce(function (s, w) { return s + w; }, 0) + sp * (chars.length - 1);
-    var cx = align === 'center' ? x - tw / 2 : align === 'right' ? x - tw : x;
-    chars.forEach(function (ch, i) { ctx.fillText(ch, cx, y); cx += ws[i] + sp; });
+  // Text mit Buchstabenabstand; liefert Startpunkt und Breite
+  function face(ctx, size, weight, fam) { ctx.font = (weight || 500) + ' ' + size + 'px ' + (fam || 'Manrope') + ', system-ui, sans-serif'; }
+  function spacedW(ctx, t, size, weight, fam, space) {
+    face(ctx, size, weight, fam);
+    var sp = size * (space == null ? 0.3 : space), chars = Array.from(t);
+    return chars.reduce(function (s, ch) { return s + ctx.measureText(ch).width; }, 0) + sp * (chars.length - 1);
   }
+  function spaced(ctx, t, x, y, size, align, color, weight, fam, space) {
+    var tw = spacedW(ctx, t, size, weight, fam, space), sp = size * (space == null ? 0.3 : space);
+    ctx.fillStyle = color; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    var cx = align === 'center' ? x - tw / 2 : align === 'right' ? x - tw : x, x0 = cx;
+    Array.from(t).forEach(function (ch) { ctx.fillText(ch, cx, y); cx += ctx.measureText(ch).width + sp; });
+    return { x: x0, w: tw };
+  }
+  function line(ctx, x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+  function sparkle(ctx, x, y, r) {   // vierzackiger Glanzstern
+    ctx.beginPath(); ctx.moveTo(x, y - r);
+    ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r);
+    ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r);
+    ctx.closePath(); ctx.fill();
+  }
+  function diamond(ctx, x, y, r) { ctx.beginPath(); ctx.moveTo(x, y - r); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r, y); ctx.closePath(); ctx.fill(); }
+  function arrow(ctx, x, y) { line(ctx, x - 24, y, x + 8, y); ctx.beginPath(); ctx.moveTo(x - 2, y - 9); ctx.lineTo(x + 8, y); ctx.lineTo(x - 2, y + 9); ctx.stroke(); }
+  function corners(ctx, left, right) {   // Ecken-Winkel wie im Sucher
+    var a = 24, L = 38;
+    [[left, a, a, 1, 1], [right, W - a, a, -1, 1], [left, a, H - a, 1, -1], [right, W - a, H - a, -1, -1]].forEach(function (c) {
+      if (!c[0]) return;
+      ctx.beginPath(); ctx.moveTo(c[1] + c[3] * L, c[2]); ctx.lineTo(c[1], c[2]); ctx.lineTo(c[1], c[2] + c[4] * L); ctx.stroke();
+    });
+  }
+  var grainTile = null;
+  function grain() {                 // feines Filmkorn, einmal erzeugt und gekachelt
+    if (grainTile) return grainTile;
+    var c = document.createElement('canvas'); c.width = c.height = 220;
+    var x = c.getContext('2d'), d = x.createImageData(220, 220), R = rng(7);
+    for (var i = 0; i < d.data.length; i += 4) { var v = Math.floor(R() * 256); d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+    x.putImageData(d, 0, 0); grainTile = c; return c;
+  }
+  function pad(n) { return String(n).padStart(2, '0'); }
   function renderSlide(st, k, scale, srcs) {
-    var s = st.plan.slides[k], th = THEMES[st.theme];
+    var n = st.plan.slides.length, s = st.plan.slides[k], th = THEMES[st.theme];
+    var parts = s.parts || 1, part = s.part || 0, first = part === 0, last = part === parts - 1;
     var c = document.createElement('canvas'); c.width = Math.round(W * scale); c.height = Math.round(H * scale);
     var ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.scale(scale, scale);
+    // Hintergrund: Farbe, goldener Lichtschein (bei Panoramen über beide Slides), Filmkorn
     ctx.fillStyle = th.bg; ctx.fillRect(0, 0, W, H);
+    var gx = parts > 1 ? parts * W / 2 - part * W : (k % 2 ? W * 0.1 : W * 0.9), gy = parts > 1 ? H * 0.3 : (k % 2 ? H * 0.95 : H * 0.05);
+    var g = ctx.createRadialGradient(gx, gy, 0, gx, gy, parts > 1 ? 950 : 800);
+    g.addColorStop(0, 'rgba(240,180,76,' + th.glow + ')'); g.addColorStop(1, 'rgba(240,180,76,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = th.grain; ctx.fillStyle = ctx.createPattern(grain(), 'repeat'); ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+    // Fotos mit versetztem goldenem Rahmen dahinter
     s.items.forEach(function (p) {
       var x = p.gx - s.off;
-      if (x + p.w <= 0 || x >= W) return;
+      if (x + p.w + FR <= 0 || x >= W) return;
+      ctx.strokeStyle = th.gold; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.9;
+      ctx.strokeRect(x + FR, p.y + FR, p.w, p.h); ctx.globalAlpha = 1;
       var src = srcs[p.k];
       if (src) ctx.drawImage(src, x, p.y, p.w, p.h);
       else { ctx.fillStyle = st.theme === 'dark' ? '#24222b' : '#e6e1d9'; ctx.fillRect(x, p.y, p.w, p.h); }
     });
-    if (s.cover) {
-      var txt = (st.text || '').toUpperCase(), y = H - 72;
-      if (txt) { spaced(ctx, txt, 48, y, 22, 'left', th.ink); spaced(ctx, CREDIT, W - 48, y, 17, 'right', th.ink); }
-      else spaced(ctx, CREDIT, W / 2, y, 18, 'center', th.ink);
-    } else {
-      // auf jeder weiteren Slide klein im unteren Rand (dort liegt nie ein Bild)
-      ctx.globalAlpha = 0.6; spaced(ctx, CREDIT, W / 2, H - 23, 13, 'center', th.ink); ctx.globalAlpha = 1;
+    // Ecken-Winkel (bei Panoramen nur außen)
+    ctx.strokeStyle = th.gold; ctx.lineWidth = 3; ctx.lineJoin = 'miter'; ctx.lineCap = 'butt'; ctx.globalAlpha = 0.85;
+    corners(ctx, first, last); ctx.globalAlpha = 1;
+    // Cover-Titel
+    if (s.cover && st.text) {
+      var txt = st.text.toUpperCase(), size = 62, ty = H - BOT - 50, w62 = spacedW(ctx, txt, 62, 800, 'Syne', 0.04);
+      if (w62 > ZW - 120) size = Math.max(12, Math.floor(62 * (ZW - 120) / w62));   // Breite wächst linear mit der Größe
+      var tr = spaced(ctx, txt, MX, ty, size, 'left', th.ink, 800, 'Syne', 0.04);
+      ctx.fillStyle = th.gold; ctx.fillRect(MX, ty - size / 2 - 26, 56, 4);
+      var sx = MX + tr.w + 40;
+      if (sx + 60 < W - MX) { sparkle(ctx, sx, ty - size * 0.18, 20); sparkle(ctx, sx + 36, ty + size * 0.22, 9); }
     }
+    // Fußzeile: Haarlinie mit Rauten, Zähler, Credit, Pfeil bzw. Glanzstern auf der letzten Slide
+    var fy = H - 40, hy = H - 72;
+    ctx.strokeStyle = th.ink; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.25;
+    line(ctx, first ? MX : 0, hy, last ? W - MX : W, hy); ctx.globalAlpha = 1;
+    ctx.fillStyle = th.gold;
+    if (first) diamond(ctx, MX, hy, 6);
+    if (last) diamond(ctx, W - MX, hy, 6);
+    spaced(ctx, pad(k + 1) + ' / ' + pad(n), MX, fy, 18, 'left', th.gold, 600, 'Manrope', 0.18);
+    ctx.globalAlpha = 0.62; spaced(ctx, CREDIT, W / 2, fy, 15, 'center', th.ink, 500, 'Manrope', 0.28); ctx.globalAlpha = 1;
+    ctx.strokeStyle = th.gold; ctx.fillStyle = th.gold; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (k < n - 1) {
+      if (s.cover) spaced(ctx, 'SWIPE', W - MX - 46, fy, 16, 'right', th.gold, 600, 'Manrope', 0.28);
+      arrow(ctx, W - MX - 10, fy);
+    } else sparkle(ctx, W - MX - 10, fy, 12);
     return c;
   }
 
@@ -152,7 +219,7 @@
         '<p class="hint ig-info"></p>' +
         '<div class="ig-lab">Cover <span class="hint">(antippen zum Wechseln)</span></div><div class="ig-covers"></div>' +
         '<label class="ig-field">Text auf dem Cover<input class="ig-text" maxlength="40" placeholder="z. B. Halloween Night"></label>' +
-        '<div class="ig-seg" role="group" aria-label="Hintergrund"><button type="button" data-t="light" aria-pressed="true">Hell</button><button type="button" data-t="dark" aria-pressed="false">Dunkel</button></div>' +
+        '<div class="ig-seg" role="group" aria-label="Hintergrund"><button type="button" data-t="light" aria-pressed="false">Hell</button><button type="button" data-t="dark" aria-pressed="true">Dunkel</button></div>' +
         '<div class="ig-acts"><button class="btn ghost ig-mix" type="button">Neu anordnen</button><button class="btn ig-save" type="button">Slides speichern</button></div>' +
         '<p class="hint ig-status" aria-live="polite"></p>' +
       '</div></div>');
@@ -184,7 +251,7 @@
   function replan() {
     if (!st) return;
     var list = st.order.map(function (k) { var it = st.items[k]; return { k: k, r: it.r, L: it.r > 1.15 }; });
-    st.plan = plan(list, st.seed, true);
+    st.plan = plan(list, st.seed, !!st.text);
     var n = st.plan.slides.length, used = list.length - st.plan.dropped;
     dlg.querySelector('.ig-count').textContent = n + ' Slides · ' + used + (used === 1 ? ' Bild' : ' Bilder');
     var info = st.note || '';
@@ -293,19 +360,22 @@
     st = {
       items: ctx.images.map(function (it) { return { i: it.i, r: (it.w && it.h) ? it.w / it.h : 2 / 3 }; }),
       title: ctx.title, note: ctx.note, fetchP: ctx.fetchP, thumb: ctx.thumb, save: ctx.save, share: ctx.share,
-      canShare: ctx.canShare, slug: ctx.slug, seed: (Date.now() & 0xffff) + 1, theme: 'light',
+      canShare: ctx.canShare, slug: ctx.slug, seed: (Date.now() & 0xffff) + 1, theme: 'dark',
       text: '', srcs: [], failed: 0, alive: true, ready: false, plan: null
     };
     st.order = st.items.map(function (_, k) { return k; });
     dlg.querySelector('.ig-text').value = '';
-    dlg.querySelectorAll('.ig-seg button').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.t === 'light'); });
+    dlg.querySelectorAll('.ig-seg button').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.t === 'dark'); });
     dlg.querySelector('.ig-status').textContent = '';
     dlg.hidden = false; document.body.style.overflow = 'hidden';
     dlg.querySelector('.ig-x').focus();
     covers(); replan();
-    if (document.fonts && document.fonts.load) document.fonts.load('500 22px Manrope').then(function () { paint(); }).catch(function () {});
+    if (document.fonts && document.fonts.load) {
+      Promise.all([document.fonts.load('500 22px Manrope'), document.fonts.load('600 16px Manrope'), document.fonts.load('800 60px Syne')])
+        .then(function () { paint(); }).catch(function () {});
+    }
     loadAll();
   }
 
-  window.GalerieInsta = { open: open, close: close, _plan: plan };
+  window.GalerieInsta = { open: open, close: close, _plan: plan, _render: renderSlide };
 })();

@@ -26,8 +26,9 @@ Portfolio-Seite von Robin Langer, Fotograf in Leipzig. Eine einzige Seite aus re
 In jeder Kundengalerie gibt es den Knopf **Instagram-Post** (und in der Auswahlleiste **Insta-Post**). Daraus wird im Browser ein fertiges Carousel im Format 4:5 (1080 × 1350 px, höchstens 20 Slides): Cover, Einzelbilder, versetzte Paare, groß/klein, Panoramen über zwei Slides und gestapelte Querformate. Kein Bild wird beschnitten. Code: `galerie/insta.js`.
 
 - Reihenfolge: ausgewählte Bilder in der Reihenfolge, in der sie angetippt wurden, ohne Auswahl alle (höchstens 36). Das erste ist das Cover, es lässt sich im Dialog wechseln.
-- Auf jeder Slide steht klein „FOTOS · LANGER-PHOTO.DE“ (auf dem Cover etwas größer, auf den übrigen Slides dezent im unteren Rand). Das lässt sich nicht abschalten.
-- Einstellbar: Text auf dem Cover, heller oder dunkler Hintergrund, „Neu anordnen“ für eine andere Aufteilung.
+- Gestaltung (seit 21.11.): goldener Rahmen, der um 14 px versetzt hinter jedem Foto liegt, Ecken-Winkel wie im Sucher, goldener Lichtschein und feines Filmkorn im Hintergrund, unten eine Fußzeile mit Haarlinie, Rauten, Zähler („02 / 08“), Credit „FOTOS · LANGER-PHOTO.DE“ und Wisch-Pfeil (auf der letzten Slide ein Glanzstern). Der Cover-Text steht groß in Syne mit goldenem Strich und Glanzsternen und schrumpft bei langen Texten. Panoramen laufen über die Kante: Rahmen, Haarlinie und Lichtschein gehen nahtlos weiter, Winkel sitzen nur außen. Der Credit lässt sich nicht abschalten.
+- Geometrie: Fotos samt Rahmen bleiben im Sicherheitsrand (`MX`, `TOP`, `BOT`, beim Cover mit Text zusätzlich `CT` für den Titel), damit nichts mit Winkeln oder Fußzeile kollidiert. Wer ein Layout oder eine Konstante in `galerie/insta.js` ändert, sollte das mit zufälligen Bildlisten über `GalerieInsta._plan` prüfen (kein Foto außerhalb, keine Überlappung). `GalerieInsta._render` zeichnet eine Slide für Tests.
+- Einstellbar: Text auf dem Cover, dunkler (Standard) oder heller Hintergrund, „Neu anordnen“ für eine andere Aufteilung.
 - Speichern: am Handy über das Teilen-Menü (iPhone: „Bilder sichern“ legt sie in Fotos), am Computer als ZIP mit durchnummerierten Slides.
 - Im Admin-Bereich öffnet **Instagram-Post** die Galerie direkt mit dem Dialog (Link mit `#k=…&ig=1`).
 - Es wird nichts hochgeladen oder an fremde Server geschickt, der Datenschutztext bleibt gleich.
