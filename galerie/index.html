@@ -15,6 +15,8 @@
 @font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/Manrope-VF.woff) format("woff")}
 @font-face{font-family:Manrope;font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/Manrope-VF.woff) format("woff")}
 @font-face{font-family:Manrope;font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/Manrope-VF.woff) format("woff")}
+@font-face{font-family:Cardo;font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/Cardo-Regular.woff) format("woff")}
+@font-face{font-family:Cardo;font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/Cardo-Italic.woff) format("woff")}
 .lock{display:flex;align-items:center;padding:clamp(2rem,8vw,6rem) 0}
 .lock .wrap{width:100%;display:grid;gap:2.5rem;align-items:end}
 @media(min-width:900px){.lock .wrap{grid-template-columns:1.2fr 1fr}}
@@ -105,6 +107,8 @@
 .ig-seg{display:inline-flex;border:1px solid var(--line);border-radius:2rem;padding:3px;justify-self:start}
 .ig-seg button{background:none;border:0;color:var(--ink);font:600 .95rem Manrope,sans-serif;padding:.5rem 1.2rem;border-radius:2rem;cursor:pointer;min-height:40px}
 .ig-seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.ig-styles{flex-wrap:wrap;border-radius:1.4rem}
+.ig-styles button{padding:.5rem 1rem}
 .ig-acts{display:flex;flex-wrap:wrap;gap:.6rem;position:sticky;bottom:0;z-index:2;background:var(--bg);padding:.8rem 0 calc(.8rem + env(safe-area-inset-bottom,0px));margin-bottom:-1rem}
 @media(max-width:420px){header.top nav{gap:.9rem}header.top a{font-size:.85rem}}
 </style>
@@ -180,6 +184,7 @@
 
 <script src="config.js"></script>
 <script src="shared.js"></script>
+<script src="insta-stile.js"></script>
 <script src="insta.js"></script>
 <script>
 (function () {
@@ -628,7 +633,7 @@
     if (idx.length > IG_MAX) { note = 'Es werden die ersten ' + IG_MAX + ' Bilder verwendet. Wähle Bilder aus, um selbst zu bestimmen, welche hineinkommen.'; idx = idx.slice(0, IG_MAX); }
     window.GalerieInsta.open({
       images: idx.map(function (i) { var it = S.m.images[i]; return { i: i, w: it.w, h: it.h }; }),
-      title: S.m.title, note: note,
+      title: S.m.title, note: note, kind: S.m.kind,
       fetchP: function (i) { return fetchDec('p', S.m.images[i].n); },
       thumb: function (i) { return getImg('t', i); },
       save: save, share: trySharing, canShare: SHARE_FILES, slug: G.slug

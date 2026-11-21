@@ -3,16 +3,15 @@
    (Cover, Einzelbild, Paar, groß/klein, Panorama über zwei Slides, Querformate gestapelt). */
 (function () {
   'use strict';
-  var W = 1080, H = 1350, MAX_SLIDES = 20, SRC_MAX = 1400;
-  // Gestaltung: goldener Rahmen, um FR versetzt hinter jedem Foto; Ecken-Winkel; Fußzeile mit Haarlinie.
-  // Fotos (samt Rahmen) bleiben im Sicherheitsrand MX / TOP / BOT, nur der Cover-Titel braucht CT extra.
-  var FR = 14, MX = 56, TOP = 64, BOT = 104, CT = 130;
+  if (!window.GalerieStile) return;   // insta-stile.js fehlt (z. B. alte Seite im Cache): Funktion bleibt aus, nichts bricht
+  var ST = window.GalerieStile, K = ST.K;
+  var W = K.W, H = K.H, MAX_SLIDES = 20, SRC_MAX = 1400;
+  // Fotos (samt Rahmen) bleiben im Sicherheitsrand MX / TOP / BOT, beim Cover mit Text zusätzlich CT für den Titel.
+  // FR ist der Spielraum rechts und unten für Rahmen und Papierrand der Stile.
+  var FR = K.FR, MX = K.MX, TOP = K.TOP, BOT = K.BOT, CT = K.CT;
   var ZW = W - 2 * MX, ZH = H - TOP - BOT;
-  var THEMES = {
-    light: { bg: '#f6f3ed', ink: '#2a2826', gold: '#b87a12', glow: 0.2, grain: 0.05 },
-    dark: { bg: '#0e0d12', ink: '#ece8e1', gold: '#f0b44c', glow: 0.17, grain: 0.05 }
-  };
-  var CREDIT = 'FOTOS · LANGER-PHOTO.DE';
+  // Vorschlag für den Stil nach Art der Galerie (im Admin gewählt); ohne Angabe: Blumen
+  var STYLE_BY_KIND = { club: 'nacht', event: 'schnoerkel', abiball: 'schnoerkel', geburtstag: 'blumen', shoot: 'blumen' };
 
   // ---------- Hilfen ----------
   function rng(seed) {
@@ -35,7 +34,7 @@
     return [P(a, MX + (ZW - f.w - FR) / 2, TOP + (ZH - f.h - FR) / 2, f.w, f.h)];
   }
   function pair(a, b, v) {           // zwei Hochformate nebeneinander, versetzt oder gerade
-    var G = 44, cw = (ZW - G) / 2, fa = fitF(a.r, cw, 1050), fb = fitF(b.r, cw, 1050);
+    var G = 56, cw = (ZW - G) / 2, fa = fitF(a.r, cw, 1050), fb = fitF(b.r, cw, 1050);
     var st = v === 2 ? 0 : 160, mx = Math.max(fa.h, fb.h) + FR;
     if (mx + st > ZH) st = Math.max(0, ZH - mx);
     var ya = v === 1 ? st : 0, yb = v === 0 ? st : 0;
@@ -43,7 +42,7 @@
     return [P(a, MX + (cw - fa.w - FR) / 2, top + ya, fa.w, fa.h), P(b, MX + cw + G + (cw - fb.w - FR) / 2, top + yb, fb.w, fb.h)];
   }
   function stack(a, b, v) {          // zwei Querformate übereinander, seitlich versetzt
-    var gap = 40, bw = 850, ha = bw / a.r, hb = bw / b.r, s = Math.min(1, (ZH - 2 * FR - gap) / (ha + hb));
+    var gap = 52, bw = 850, ha = bw / a.r, hb = bw / b.r, s = Math.min(1, (ZH - 2 * FR - gap) / (ha + hb));
     var wa = bw * s, wb = bw * s; ha *= s; hb *= s;
     var top = TOP + (ZH - ha - hb - gap - 2 * FR) / 2;
     return [P(a, v ? W - MX - FR - wa : MX, top, wa, ha), P(b, v ? MX : W - MX - FR - wb, top + ha + FR + gap, wb, hb)];
@@ -117,95 +116,39 @@
     if (bmp.close) bmp.close();
     return out;
   }
-  // Text mit Buchstabenabstand; liefert Startpunkt und Breite
-  function face(ctx, size, weight, fam) { ctx.font = (weight || 500) + ' ' + size + 'px ' + (fam || 'Manrope') + ', system-ui, sans-serif'; }
-  function spacedW(ctx, t, size, weight, fam, space) {
-    face(ctx, size, weight, fam);
-    var sp = size * (space == null ? 0.3 : space), chars = Array.from(t);
-    return chars.reduce(function (s, ch) { return s + ctx.measureText(ch).width; }, 0) + sp * (chars.length - 1);
-  }
-  function spaced(ctx, t, x, y, size, align, color, weight, fam, space) {
-    var tw = spacedW(ctx, t, size, weight, fam, space), sp = size * (space == null ? 0.3 : space);
-    ctx.fillStyle = color; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-    var cx = align === 'center' ? x - tw / 2 : align === 'right' ? x - tw : x, x0 = cx;
-    Array.from(t).forEach(function (ch) { ctx.fillText(ch, cx, y); cx += ctx.measureText(ch).width + sp; });
-    return { x: x0, w: tw };
-  }
-  function line(ctx, x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
-  function sparkle(ctx, x, y, r) {   // vierzackiger Glanzstern
-    ctx.beginPath(); ctx.moveTo(x, y - r);
-    ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r);
-    ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r);
-    ctx.closePath(); ctx.fill();
-  }
-  function diamond(ctx, x, y, r) { ctx.beginPath(); ctx.moveTo(x, y - r); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r, y); ctx.closePath(); ctx.fill(); }
-  function arrow(ctx, x, y) { line(ctx, x - 24, y, x + 8, y); ctx.beginPath(); ctx.moveTo(x - 2, y - 9); ctx.lineTo(x + 8, y); ctx.lineTo(x - 2, y + 9); ctx.stroke(); }
-  function corners(ctx, left, right) {   // Ecken-Winkel wie im Sucher
-    var a = 24, L = 38;
-    [[left, a, a, 1, 1], [right, W - a, a, -1, 1], [left, a, H - a, 1, -1], [right, W - a, H - a, -1, -1]].forEach(function (c) {
-      if (!c[0]) return;
-      ctx.beginPath(); ctx.moveTo(c[1] + c[3] * L, c[2]); ctx.lineTo(c[1], c[2]); ctx.lineTo(c[1], c[2] + c[4] * L); ctx.stroke();
-    });
-  }
-  var grainTile = null;
-  function grain() {                 // feines Filmkorn, einmal erzeugt und gekachelt
-    if (grainTile) return grainTile;
-    var c = document.createElement('canvas'); c.width = c.height = 220;
-    var x = c.getContext('2d'), d = x.createImageData(220, 220), R = rng(7);
-    for (var i = 0; i < d.data.length; i += 4) { var v = Math.floor(R() * 256); d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
-    x.putImageData(d, 0, 0); grainTile = c; return c;
-  }
-  function pad(n) { return String(n).padStart(2, '0'); }
+  function seedOf(a, b, c) { return (Math.imul(a >>> 0, 2654435761) ^ Math.imul((b + 1) >>> 0, 1597334677) ^ Math.imul((c + 7) >>> 0, 3812015801)) >>> 0 || 1; }
   function renderSlide(st, k, scale, srcs) {
-    var n = st.plan.slides.length, s = st.plan.slides[k], th = THEMES[st.theme];
-    var parts = s.parts || 1, part = s.part || 0, first = part === 0, last = part === parts - 1;
+    var n = st.plan.slides.length, s = st.plan.slides[k], S = ST.styles[st.style] || ST.styles.gold, sh = S.shift || 0;
+    var parts = s.parts || 1, part = s.part || 0, hasText = !!st.text;
     var c = document.createElement('canvas'); c.width = Math.round(W * scale); c.height = Math.round(H * scale);
     var ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.scale(scale, scale);
-    // Hintergrund: Farbe, goldener Lichtschein (bei Panoramen über beide Slides), Filmkorn
-    ctx.fillStyle = th.bg; ctx.fillRect(0, 0, W, H);
-    var gx = parts > 1 ? parts * W / 2 - part * W : (k % 2 ? W * 0.1 : W * 0.9), gy = parts > 1 ? H * 0.3 : (k % 2 ? H * 0.95 : H * 0.05);
-    var g = ctx.createRadialGradient(gx, gy, 0, gx, gy, parts > 1 ? 950 : 800);
-    g.addColorStop(0, 'rgba(240,180,76,' + th.glow + ')'); g.addColorStop(1, 'rgba(240,180,76,0)');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    ctx.globalAlpha = th.grain; ctx.fillStyle = ctx.createPattern(grain(), 'repeat'); ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
-    // Fotos mit versetztem goldenem Rahmen dahinter
+    var rects = [];
     s.items.forEach(function (p) {
-      var x = p.gx - s.off;
+      var x = p.gx - s.off + sh;
       if (x + p.w + FR <= 0 || x >= W) return;
-      ctx.strokeStyle = th.gold; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.9;
-      ctx.strokeRect(x + FR, p.y + FR, p.w, p.h); ctx.globalAlpha = 1;
-      var src = srcs[p.k];
-      if (src) ctx.drawImage(src, x, p.y, p.w, p.h);
-      else { ctx.fillStyle = st.theme === 'dark' ? '#24222b' : '#e6e1d9'; ctx.fillRect(x, p.y, p.w, p.h); }
+      rects.push({ x: x, y: p.y + sh, w: p.w, h: p.h, k: p.k });
     });
-    // Ecken-Winkel (bei Panoramen nur außen)
-    ctx.strokeStyle = th.gold; ctx.lineWidth = 3; ctx.lineJoin = 'miter'; ctx.lineCap = 'butt'; ctx.globalAlpha = 0.85;
-    corners(ctx, first, last); ctx.globalAlpha = 1;
-    // Cover-Titel
-    if (s.cover && st.text) {
-      var txt = st.text.toUpperCase(), size = 62, ty = H - BOT - 50, w62 = spacedW(ctx, txt, 62, 800, 'Syne', 0.04);
-      if (w62 > ZW - 120) size = Math.max(12, Math.floor(62 * (ZW - 120) / w62));   // Breite wächst linear mit der Größe
-      var tr = spaced(ctx, txt, MX, ty, size, 'left', th.ink, 800, 'Syne', 0.04);
-      ctx.fillStyle = th.gold; ctx.fillRect(MX, ty - size / 2 - 26, 56, 4);
-      var sx = MX + tr.w + 40;
-      if (sx + 60 < W - MX) { sparkle(ctx, sx, ty - size * 0.18, 20); sparkle(ctx, sx + 36, ty + size * 0.22, 9); }
-    }
-    // Fußzeile: Haarlinie mit Rauten, Zähler, Credit, Pfeil bzw. Glanzstern auf der letzten Slide
-    var fy = H - 40, hy = H - 72;
-    ctx.strokeStyle = th.ink; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.25;
-    line(ctx, first ? MX : 0, hy, last ? W - MX : W, hy); ctx.globalAlpha = 1;
-    ctx.fillStyle = th.gold;
-    if (first) diamond(ctx, MX, hy, 6);
-    if (last) diamond(ctx, W - MX, hy, 6);
-    spaced(ctx, pad(k + 1) + ' / ' + pad(n), MX, fy, 18, 'left', th.gold, 600, 'Manrope', 0.18);
-    ctx.globalAlpha = 0.62; spaced(ctx, CREDIT, W / 2, fy, 15, 'center', th.ink, 500, 'Manrope', 0.28); ctx.globalAlpha = 1;
-    ctx.strokeStyle = th.gold; ctx.fillStyle = th.gold; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    if (k < n - 1) {
-      if (s.cover) spaced(ctx, 'SWIPE', W - MX - 46, fy, 16, 'right', th.gold, 600, 'Manrope', 0.28);
-      arrow(ctx, W - MX - 10, fy);
-    } else sparkle(ctx, W - MX - 10, fy, 12);
+    var E = {
+      k: k, n: n, s: s, parts: parts, part: part, first: part === 0, last: part === parts - 1, cover: !!s.cover, text: st.text || '',
+      theme: st.theme, p: S.pal(st.theme), scale: scale, rects: rects, blocked: ST.blockedFor(rects, !!s.cover, hasText),
+      R: rng(seedOf(st.seed, k, 11)), RG: rng(seedOf(st.seed, s.items[0].k, 23)),
+      clipY: (s.cover && hasText) ? H - BOT - CT + 6 : H - BOT + 14
+    };
+    S.behind(ctx, E);
+    rects.forEach(function (r) {
+      if (S.mat) S.mat(ctx, E, r);
+      var src = srcs[r.k];
+      if (src) ctx.drawImage(src, r.x, r.y, r.w, r.h);
+      else { ctx.fillStyle = st.theme === 'dark' ? '#24222b' : '#e6e1d9'; ctx.fillRect(r.x, r.y, r.w, r.h); }
+    });
+    S.front(ctx, E);
     return c;
+  }
+  function ensureFonts(style) {
+    var S = ST.styles[style] || ST.styles.gold;
+    if (!(document.fonts && document.fonts.load)) return Promise.resolve();
+    return Promise.all(S.fonts.map(function (f) { return document.fonts.load(f); })).catch(function () {});
   }
 
   // ---------- Dialog ----------
@@ -219,7 +162,8 @@
         '<p class="hint ig-info"></p>' +
         '<div class="ig-lab">Cover <span class="hint">(antippen zum Wechseln)</span></div><div class="ig-covers"></div>' +
         '<label class="ig-field">Text auf dem Cover<input class="ig-text" maxlength="40" placeholder="z. B. Halloween Night"></label>' +
-        '<div class="ig-seg" role="group" aria-label="Hintergrund"><button type="button" data-t="light" aria-pressed="false">Hell</button><button type="button" data-t="dark" aria-pressed="true">Dunkel</button></div>' +
+        '<div class="ig-lab">Stil</div><div class="ig-seg ig-styles" role="group" aria-label="Stil">' + ST.order.map(function (id) { return '<button type="button" data-s="' + id + '" aria-pressed="false">' + ST.styles[id].name + '</button>'; }).join('') + '</div>' +
+        '<div class="ig-lab">Hintergrund</div><div class="ig-seg" role="group" aria-label="Hintergrund"><button type="button" data-t="light" aria-pressed="false">Hell</button><button type="button" data-t="dark" aria-pressed="true">Dunkel</button></div>' +
         '<div class="ig-acts"><button class="btn ghost ig-mix" type="button">Neu anordnen</button><button class="btn ig-save" type="button">Slides speichern</button></div>' +
         '<p class="hint ig-status" aria-live="polite"></p>' +
       '</div></div>');
@@ -230,10 +174,17 @@
     q('.ig-mix').onclick = function () { st.seed = (st.seed * 7919 + 13) >>> 0; replan(); };
     var tt = null;
     q('.ig-text').oninput = function () { st.text = this.value.trim(); clearTimeout(tt); tt = setTimeout(replan, 250); };
-    dlg.querySelectorAll('.ig-seg button').forEach(function (b) {
+    dlg.querySelectorAll('.ig-seg button[data-t]').forEach(function (b) {
       b.onclick = function () {
         st.theme = b.dataset.t;
-        dlg.querySelectorAll('.ig-seg button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+        dlg.querySelectorAll('.ig-seg button[data-t]').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+        paint();
+      };
+    });
+    dlg.querySelectorAll('.ig-styles button').forEach(function (b) {
+      b.onclick = function () {
+        var mine = st; st.style = b.dataset.s; markStyle();
+        ensureFonts(st.style).then(function () { if (st === mine) paint(); });
         paint();
       };
     });
@@ -248,6 +199,7 @@
     if (open.last) open.last.focus();
   }
 
+  function markStyle() { dlg.querySelectorAll('.ig-styles button').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.s === st.style); }); }
   function replan() {
     if (!st) return;
     var list = st.order.map(function (k) { var it = st.items[k]; return { k: k, r: it.r, L: it.r > 1.15 }; });
@@ -316,6 +268,7 @@
     var btn = dlg.querySelector('.ig-save'), sEl = dlg.querySelector('.ig-status');
     if (!st.ready) { sEl.textContent = 'Einen Moment, die Bilder laden noch …'; return; }
     btn.disabled = true;
+    await ensureFonts(st.style);
     var files = [], base = st.slug(st.title || 'galerie') + '-instagram-';
     try {
       for (var k = 0; k < st.plan.slides.length; k++) {
@@ -360,20 +313,18 @@
     st = {
       items: ctx.images.map(function (it) { return { i: it.i, r: (it.w && it.h) ? it.w / it.h : 2 / 3 }; }),
       title: ctx.title, note: ctx.note, fetchP: ctx.fetchP, thumb: ctx.thumb, save: ctx.save, share: ctx.share,
-      canShare: ctx.canShare, slug: ctx.slug, seed: (Date.now() & 0xffff) + 1, theme: 'dark',
+      canShare: ctx.canShare, slug: ctx.slug, seed: (Date.now() & 0xffff) + 1, theme: 'dark', style: ST.styles[ctx.style] ? ctx.style : (STYLE_BY_KIND[ctx.kind] || 'blumen'),
       text: '', srcs: [], failed: 0, alive: true, ready: false, plan: null
     };
     st.order = st.items.map(function (_, k) { return k; });
+    markStyle();
     dlg.querySelector('.ig-text').value = '';
-    dlg.querySelectorAll('.ig-seg button').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.t === 'dark'); });
+    dlg.querySelectorAll('.ig-seg button[data-t]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.t === 'dark'); });
     dlg.querySelector('.ig-status').textContent = '';
     dlg.hidden = false; document.body.style.overflow = 'hidden';
     dlg.querySelector('.ig-x').focus();
     covers(); replan();
-    if (document.fonts && document.fonts.load) {
-      Promise.all([document.fonts.load('500 22px Manrope'), document.fonts.load('600 16px Manrope'), document.fonts.load('800 60px Syne')])
-        .then(function () { paint(); }).catch(function () {});
-    }
+    var mine = st; ensureFonts(st.style).then(function () { if (st === mine) paint(); });
     loadAll();
   }
 
