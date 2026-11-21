@@ -112,8 +112,16 @@ details.help .btn{margin:.4rem 0}
     <div class="fields" id="form">
       <div class="mode" id="modeBox" hidden><span id="modeTxt"></span><button class="btn small ghost" id="modeCancel" type="button">Abbrechen</button></div>
       <label>Titel (sieht dein Kunde)<input id="fTitle" maxlength="120" placeholder="z. B. Abiball Gymnasium Leipzig 2026"></label>
+      <label>Art der Galerie
+        <select id="fKind"></select>
+        <span class="hint">Bestimmt den ersten Satz der Nachricht, die du dem Kunden schickst.</span>
+      </label>
+      <label id="kindCustom" hidden>Eigener Satz
+        <input id="fIntro" maxlength="120" placeholder="z. B. Hier sind die Fotos vom Abend 📸">
+        <span class="hint">Die Nachricht beginnt mit „Hallo!“ und diesem Satz.</span>
+      </label>
       <div class="two">
-        <label>Datum des Shootings<input id="fDate" type="date"></label>
+        <label>Datum<input id="fDate" type="date"></label>
         <label>Download möglich bis<input id="fUntil" type="date"></label>
       </div>
       <label>Nachricht an den Kunden (optional)<textarea id="fNote" maxlength="1000" placeholder="z. B. Danke für den schönen Abend!"></textarea></label>
@@ -171,6 +179,29 @@ details.help .btn{margin:.4rem 0}
   var remote = null; // {id: {bytes, count}}
   var mode = null;   // null = neue Galerie, sonst {id, pw, m}
   var picked = [];
+
+  // Art der Galerie: [Schlüssel, Name in der Auswahl, erster Satz der Kundennachricht]
+  var KINDS = [
+    ['shoot', 'Shooting', 'Die Bilder von deinem letzten Shooting sind da 📸'],
+    ['club', 'Clubabend', 'Die Bilder von deinem letzten Clubabend sind da 📸'],
+    ['event', 'Event', 'Die Bilder von deinem letzten Event sind da 📸'],
+    ['geburtstag', 'Geburtstag', 'Die Bilder von deinem Geburtstag sind da 📸'],
+    ['abiball', 'Abiball', 'Die Bilder vom Abiball sind da 📸'],
+    ['eigen', 'Eigener Satz …', '']
+  ];
+  function kindOf(k) { return KINDS.find(function (x) { return x[0] === k; }); }
+  $('fKind').innerHTML = KINDS.map(function (k) { return '<option value="' + k[0] + '">' + k[1] + '</option>'; }).join('');
+  function setKind(kind, intro) {
+    $('fKind').value = kindOf(kind) ? kind : 'shoot';
+    $('fIntro').value = intro || '';
+    $('kindCustom').hidden = $('fKind').value !== 'eigen';
+  }
+  $('fKind').onchange = function () {
+    $('kindCustom').hidden = this.value !== 'eigen';
+    save('galerie-kind', this.value);
+    if (!$('kindCustom').hidden) $('fIntro').focus();
+  };
+  setKind(load('galerie-kind', 'shoot'), '');
 
   function toast(t) { var d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2400); }
   async function copy(t) { try { await navigator.clipboard.writeText(t); toast('Kopiert'); } catch (_) { prompt('Zum Kopieren:', t); } }
@@ -306,7 +337,7 @@ details.help .btn{margin:.4rem 0}
     if (!mode && pw.length < 10 && !confirm('Das Passwort ist kurz und damit leichter zu erraten. Trotzdem verwenden?')) return;
     var full = $('fFull').checked;
     uploading = true; this.disabled = true; $('doneBox').hidden = true; $('progBox').hidden = false; $('progKeep').hidden = false; $('log').innerHTML = '';
-    $('form').querySelectorAll('input,textarea,button:not(#start)').forEach(function (el) { el.disabled = true; });
+    $('form').querySelectorAll('input,textarea,select,button:not(#start)').forEach(function (el) { el.disabled = true; });
     var wake = null; try { wake = await navigator.wakeLock.request('screen'); } catch (_) {}
     var txt = $('progTxt'), bar = $('progBar');
     try {
@@ -318,7 +349,7 @@ details.help .btn{margin:.4rem 0}
         if (remote && remote[d.id]) throw new Error('Zu diesem Passwort gibt es schon eine Galerie. Erzeuge ein neues Passwort.');
         m = { v: 1, created: Date.now(), images: [] };
       }
-      m.title = title; m.date = $('fDate').value; m.until = $('fUntil').value; m.note = $('fNote').value.trim(); m.updated = Date.now();
+      m.title = title; m.kind = $('fKind').value; m.intro = m.kind === 'eigen' ? $('fIntro').value.trim() : ''; m.date = $('fDate').value; m.until = $('fUntil').value; m.note = $('fNote').value.trim(); m.updated = Date.now();
       var dir = 'g/' + d.id + '/', next = 0, done = 0, failed = 0, total = picked.length;
       var startN = m.images.reduce(function (x, i) { return Math.max(x, i.n); }, 0);
       var added = [];
@@ -362,7 +393,7 @@ details.help .btn{margin:.4rem 0}
       await put(dir + 'm.bin', await G.encrypt(d.key, new TextEncoder().encode(JSON.stringify(m))));
       bar.style.width = '100%';
       var bytes = m.images.reduce(function (s, i) { return s + (i.size || 0); }, 0);
-      upsert({ id: d.id, pw: pw, title: m.title, date: m.date, until: m.until, count: m.images.length, bytes: bytes, created: m.created });
+      upsert({ id: d.id, pw: pw, title: m.title, kind: m.kind, intro: m.intro, date: m.date, until: m.until, count: m.images.length, bytes: bytes, created: m.created });
       showDone(pw, m, added.length, failed);
       resetForm();
       refresh();
@@ -371,19 +402,26 @@ details.help .btn{margin:.4rem 0}
       var li = document.createElement('li'); li.textContent = 'Abgebrochen: ' + (e.status === 401 ? 'Der Admin-Schlüssel stimmt nicht.' : e.message); $('log').appendChild(li);
     } finally {
       uploading = false; if (wake) try { wake.release(); } catch (_) {}
-      $('form').querySelectorAll('input,textarea,button').forEach(function (el) { el.disabled = false; });
+      $('form').querySelectorAll('input,textarea,select,button').forEach(function (el) { el.disabled = false; });
       $('start').disabled = !picked.length;
     }
   };
 
+  // Erster Satz der Nachricht. Galerien ohne gespeicherte Art (ältere) behalten den bisherigen Satz.
+  function intro(g) {
+    if (g.kind === 'eigen') return (g.intro || '').trim() || 'Deine Fotos sind fertig 📸';
+    var k = kindOf(g.kind);
+    if (k) return k[2];
+    return 'Deine Fotos' + (g.title ? ' von „' + g.title + '“' : '') + ' sind fertig 📸';
+  }
   function message(g) {
     var link = SITE + '#k=' + encodeURIComponent(g.pw);
-    return 'Hallo! Deine Fotos' + (g.title ? ' von „' + g.title + '“' : '') + ' sind fertig 📸\n\n' +
+    return 'Hallo! ' + intro(g) + '\n\n' +
       'Galerie: ' + SITE + '\nPasswort: ' + g.pw + '\n\nOder direkt öffnen: ' + link +
       (g.until ? '\n\nDu kannst die Bilder bis ' + G.fmtDate(g.until) + ' herunterladen.' : '') + '\n\nViele Grüße\nRobin';
   }
   function showDone(pw, m, n, failed) {
-    var g = { pw: pw, title: m.title, until: m.until };
+    var g = { pw: pw, title: m.title, kind: m.kind, intro: m.intro, until: m.until };
     var box = $('doneBox'); box.hidden = false; $('progBox').hidden = !failed;
     $('progTxt').textContent = failed ? 'Fertig. Diese Dateien wurden übersprungen:' : ''; $('progKeep').hidden = true;
     box.innerHTML = '<div class="done"><h3 style="margin:0;font-size:1.4rem"></h3><p class="hint">Die Galerie ist ab sofort online.</p><pre></pre><div class="row" style="flex-wrap:wrap"><button class="btn small" type="button" data-a="copy">Nachricht kopieren</button><button class="btn small ghost" type="button" data-a="share" hidden>Teilen …</button><button class="btn small ghost" type="button" data-a="ig">Instagram-Post erstellen</button></div></div>';
@@ -396,7 +434,7 @@ details.help .btn{margin:.4rem 0}
   }
   function resetForm() {
     mode = null; picked = []; $('files').value = '';
-    ['fTitle', 'fDate', 'fUntil', 'fNote'].forEach(function (k) { $(k).value = ''; });
+    ['fTitle', 'fDate', 'fUntil', 'fNote'].forEach(function (k) { $(k).value = ''; }); setKind(load('galerie-kind', 'shoot'), '');
     $('fPw').value = genPw(); $('pwLabel').hidden = false; $('modeBox').hidden = true;
     $('formTitle').textContent = 'Neue Galerie'; $('start').textContent = 'Hochladen';
     setFiles([]);
@@ -430,7 +468,7 @@ details.help .btn{margin:.4rem 0}
       if (remote && !r) { var tg = document.createElement('span'); tg.className = 'tag'; tg.textContent = 'nicht online'; t.appendChild(tg); }
       var meta = document.createElement('div'); meta.className = 'm';
       var cnt = r ? r.count : g && g.count;
-      meta.textContent = [g && g.date ? G.fmtDate(g.date) : '', cnt != null ? cnt + (cnt === 1 ? ' Bild' : ' Bilder') : '', r ? G.fmtBytes(r.bytes) : '', g && g.until ? 'bis ' + G.fmtDate(g.until) : ''].filter(Boolean).join(' · ');
+      meta.textContent = [g && g.kind !== 'eigen' && kindOf(g.kind) ? kindOf(g.kind)[1] : '', g && g.date ? G.fmtDate(g.date) : '', cnt != null ? cnt + (cnt === 1 ? ' Bild' : ' Bilder') : '', r ? G.fmtBytes(r.bytes) : '', g && g.until ? 'bis ' + G.fmtDate(g.until) : ''].filter(Boolean).join(' · ');
       li.appendChild(t); li.appendChild(meta);
       if (g) { var pw = document.createElement('div'); pw.className = 'pw'; pw.textContent = 'Passwort: ' + g.pw; li.appendChild(pw); }
       var acts = document.createElement('div'); acts.className = 'acts';
@@ -469,9 +507,9 @@ details.help .btn{margin:.4rem 0}
     try {
       var o = await openByPw(g.pw);
       mode = { id: o.id, pw: g.pw, m: o.m };
-      $('fTitle').value = o.m.title || ''; $('fDate').value = o.m.date || ''; $('fUntil').value = o.m.until || ''; $('fNote').value = o.m.note || '';
+      $('fTitle').value = o.m.title || ''; $('fDate').value = o.m.date || ''; $('fUntil').value = o.m.until || ''; $('fNote').value = o.m.note || ''; setKind(o.m.kind, o.m.intro);
       $('pwLabel').hidden = true; $('modeBox').hidden = false;
-      $('modeTxt').textContent = 'Bilder zu „' + (o.m.title || 'Galerie') + '“ hinzufügen (' + o.m.images.length + ' vorhanden). Titel, Daten und Nachricht kannst du dabei auch ändern.';
+      $('modeTxt').textContent = 'Bilder zu „' + (o.m.title || 'Galerie') + '“ hinzufügen (' + o.m.images.length + ' vorhanden). Titel, Art, Daten und Nachricht kannst du dabei auch ändern.';
       $('formTitle').textContent = 'Bilder hinzufügen'; $('start').textContent = 'Hinzufügen';
       $('doneBox').hidden = true; $('progBox').hidden = true;
       $('cNew').scrollIntoView({ behavior: 'smooth' });
@@ -483,7 +521,7 @@ details.help .btn{margin:.4rem 0}
     var b = this; b.disabled = true; $('impErr').textContent = '';
     try {
       var o = await openByPw(pw);
-      upsert({ id: o.id, pw: pw, title: o.m.title, date: o.m.date, until: o.m.until, count: o.m.images.length, created: o.m.created });
+      upsert({ id: o.id, pw: pw, title: o.m.title, kind: o.m.kind, intro: o.m.intro, date: o.m.date, until: o.m.until, count: o.m.images.length, created: o.m.created });
       $('impPw').value = ''; renderList(); toast('Galerie hinzugefügt');
     } catch (e) { $('impErr').textContent = e.status === 404 ? 'Zu diesem Passwort gibt es keine Galerie.' : (e.name === 'OperationError' ? 'Das Passwort passt nicht.' : e.message); }
     b.disabled = false;

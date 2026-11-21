@@ -32,6 +32,15 @@ In jeder Kundengalerie gibt es den Knopf **Instagram-Post** (und in der Auswahll
 - Im Admin-Bereich öffnet **Instagram-Post** die Galerie direkt mit dem Dialog (Link mit `#k=…&ig=1`).
 - Es wird nichts hochgeladen oder an fremde Server geschickt, der Datenschutztext bleibt gleich.
 
+## Nachricht an den Kunden (Admin)
+
+Beim Anlegen einer Galerie wählt Robin im Admin-Formular die **Art der Galerie**. Sie bestimmt den ersten Satz der kopierten Nachricht („Hallo! Die Bilder von deinem letzten Clubabend sind da 📸 …“). Zur Wahl stehen Shooting, Clubabend, Event, Geburtstag, Abiball und „Eigener Satz …“ (freier Text). Die zuletzt gewählte Art merkt sich der Browser (`galerie-kind` in localStorage).
+
+- Neue Art ergänzen: eine Zeile im Array `KINDS` in `galerie/admin/index.html` (Schlüssel, Name in der Auswahl, erster Satz).
+- Die Art steht verschlüsselt in den Galerie-Metadaten (`m.kind`, `m.intro`) und in der lokalen Liste. Der Titel steht nicht mehr im ersten Satz, er steht ohnehin auf der Galerieseite.
+- Galerien ohne gespeicherte Art (vor dieser Änderung angelegt) behalten den alten Satz „Deine Fotos von „Titel“ sind fertig 📸“. Wer solchen Galerien über „Bilder hinzufügen“ Bilder ergänzt, speichert die Art mit (die Auswahl steht dort zunächst auf Shooting, bei Bedarf umstellen).
+- Die Kundenseite (`galerie/index.html`) zeigt die Art nicht an und braucht keine Änderung.
+
 ## Neue Fotos hinzufügen
 
 Am einfachsten: Fotos an Claude schicken, mit Kategorie und einem Satz Beschreibung pro Bild. Von Hand:
